@@ -1,0 +1,54 @@
+﻿@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Registrar Usuario";
+}
+
+<h2 class="text-center">Registrar Usuario</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-action="CrearUsuario" method="post">
+    <div class="form-group">
+        <label for="Nombre">Nombre</label>
+        <input asp-for="Nombre" class="form-control" required />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Email">Email</label>
+        <input asp-for="Email" type="email" class="form-control" required />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Password">Contraseña</label>
+        <input asp-for="Password" type="password" class="form-control" required />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Rol">Rol</label>
+        <select asp-for="Rol" class="form-select" required>
+            <option value="">Seleccione un rol</option>
+            <option value="Recepcionista">Recepcionista</option>
+            <option value="Vendedor">Vendedor</option>
+            <option value="Gerente">Gerente</option>
+        </select>
+        <span asp-validation-for="Rol" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Registrar Usuario</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

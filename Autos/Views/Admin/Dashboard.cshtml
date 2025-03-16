@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "Panel de Administración";
+}
+
+<h2 class="text-center">Panel de Administración</h2>
+
+<div class="row text-center">
+    <!-- Gestión de Usuarios -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Gestión de Usuarios</h5>
+                <p class="card-text">Administrar clientes y roles de usuarios.</p>
+                <a asp-controller="Admin" asp-action="Usuarios" class="btn btn-primary">Ir</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crear Usuario -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Registrar Usuario</h5>
+                <p class="card-text">Crear usuarios con roles específicos.</p>
+                <a asp-controller="Admin" asp-action="CrearUsuario" class="btn btn-success">Ir</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gestión de Autos -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Gestión de Autos</h5>
+                <p class="card-text">Agregar, editar o eliminar autos en venta.</p>
+                <a asp-controller="Autos" asp-action="Index" class="btn btn-warning">Ir</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gestión de Reservas y Ventas -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Reservas y Ventas</h5>
+                <p class="card-text">Gestionar reservas y ventas de autos.</p>
+                <a asp-controller="Ventas" asp-action="Index" class="btn btn-info">Ir</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuración -->
+    <div class="col-lg-3 col-md-6 mt-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Configuración</h5>
+                <p class="card-text">Gestionar permisos y ajustes del sistema.</p>
+                <a asp-controller="Admin" asp-action="Configuracion" class="btn btn-secondary">Ir</a>
+            </div>
+        </div>
+    </div>
+</div>

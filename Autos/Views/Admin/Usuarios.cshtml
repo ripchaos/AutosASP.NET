@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Autos.Models.Usuario>
+
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<h2 class="text-center">Gestión de Usuarios</h2>
+
+<!-- 🚀 Mensajes de éxito o error -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<!-- 🚀 Tabla responsiva para mejor visualización -->
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol Actual</th>
+                <th>Nuevo Rol</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var usuario in Model)
+                {
+                    <tr>
+                        <td>@usuario.Nombre</td>
+                        <td>@usuario.Email</td>
+                        <td>@usuario.Rol</td>
+                        <td colspan="2">
+                            <!-- 📌 El <form> ahora está en una sola celda -->
+                            <form asp-action="AsignarRol" method="post">
+                                <input type="hidden" name="userId" value="@usuario.Id" />
+                                <div class="d-flex">
+                                    <select name="nuevoRol" class="form-select me-2">
+                                        <option value="Cliente" selected>Cliente</option>
+                                        <option value="Administrador">Administrador</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No hay usuarios registrados.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
