@@ -1,22 +1,30 @@
-﻿using Autos.Models;
+﻿using Autos.Data;
+using Autos.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Autos.Controllers
 {
-    [Authorize(Roles = "Administrador")] // Solo los administradores pueden acceder
+    [Authorize(Roles = "Administrador")]
     public class AdminController : Controller
     {
         private readonly UserManager<Usuario> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ApplicationDbContext _context;
 
-        public AdminController(UserManager<Usuario> userManager, RoleManager<IdentityRole> roleManager)
+        public AdminController(UserManager<Usuario> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
+        }
+
+        // 🔹 Vista para el Panel de Administración
+        public IActionResult Dashboard()
+        {
+            return View();
         }
 
         // 🔹 Vista para Crear Usuarios
@@ -25,13 +33,11 @@ namespace Autos.Controllers
             return View();
         }
 
-        // 🔹 Método para Crear Usuarios con el Rol seleccionado
         [HttpPost]
         public async Task<IActionResult> CrearUsuario(RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // 📌 Lista de roles permitidos para asignar (excluye "Administrador")
                 var rolesPermitidos = new[] { "Recepcionista", "Vendedor", "Gerente" };
 
                 if (!rolesPermitidos.Contains(model.Rol))
@@ -40,7 +46,6 @@ namespace Autos.Controllers
                     return View(model);
                 }
 
-                // 📌 Verificar si el usuario ya existe
                 var existingUser = await _userManager.FindByEmailAsync(model.Email);
                 if (existingUser != null)
                 {
@@ -48,7 +53,6 @@ namespace Autos.Controllers
                     return View(model);
                 }
 
-                // 📌 Crear el nuevo usuario
                 var user = new Usuario
                 {
                     UserName = model.Email,
@@ -61,13 +65,11 @@ namespace Autos.Controllers
 
                 if (result.Succeeded)
                 {
-                    // 📌 Verificar si el rol existe, si no, crearlo
                     if (!await _roleManager.RoleExistsAsync(model.Rol))
                     {
                         await _roleManager.CreateAsync(new IdentityRole(model.Rol));
                     }
 
-                    // 📌 Asignar el rol al usuario
                     await _userManager.AddToRoleAsync(user, model.Rol);
 
                     TempData["Success"] = $"Usuario {model.Email} creado con éxito y asignado al rol {model.Rol}.";
@@ -125,6 +127,38 @@ namespace Autos.Controllers
             TempData["Success"] = $"Rol actualizado a {nuevoRol} correctamente.";
             return RedirectToAction("Usuarios");
         }
+
+        // 🔹 Vista para Configurar Margen de Descuento
+        public async Task<IActionResult> ConfigurarDescuento()
+        {
+            var config = await _context.DescuentosConfig.FirstOrDefaultAsync();
+            if (config == null) config = new DescuentoConfig();
+            return View(config);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfigurarDescuento(DescuentoConfig config)
+        {
+            if (!ModelState.IsValid)
+                return View(config);
+
+            var existente = await _context.DescuentosConfig.FirstOrDefaultAsync();
+            if (existente == null)
+            {
+                _context.DescuentosConfig.Add(config);
+            }
+            else
+            {
+                existente.PorcentajeMaximo = config.PorcentajeMaximo;
+                _context.DescuentosConfig.Update(existente);
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Margen de descuento actualizado correctamente.";
+            return RedirectToAction("Dashboard");
+
+
+        }
     }
 }
-
+    

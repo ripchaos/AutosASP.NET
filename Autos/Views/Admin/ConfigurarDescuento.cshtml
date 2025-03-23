@@ -1,0 +1,31 @@
+﻿@model Autos.Models.DescuentoConfig
+
+@{
+    ViewData["Title"] = "Configurar Descuento";
+}
+
+<h2 class="text-center">Configurar Descuento Máximo</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-action="ConfigurarDescuento" method="post">
+    <div class="form-group">
+        <label asp-for="PorcentajeMaximo" class="form-label"></label>
+        <input asp-for="PorcentajeMaximo" class="form-control" min="0" max="100" step="0.01" />
+        <span asp-validation-for="PorcentajeMaximo" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Guardar Descuento</button>
+    <a asp-action="Dashboard" class="btn btn-secondary mt-3 ms-2">Volver</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
