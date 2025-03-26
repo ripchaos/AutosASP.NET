@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\jmari\\onedrive\\documentos\\github\\autosasp.net\\autos\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\jmari\\onedrive\\documentos\\github\\autosasp.net\\autos\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -19,12 +23,25 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
+              "ToolTip": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "Controllers\\AdminController.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-25T03:03:45.831Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "Data\\ApplicationDbContext.cs",
               "ToolTip": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\Data\\ApplicationDbContext.cs",
               "RelativeToolTip": "Data\\ApplicationDbContext.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAIA8wBEAAAA0AAAAAAAAAA==",
+              "ViewState": "AgIAABIAAAAAAAAAAIA4wBEAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-23T14:36:26.91Z",
               "EditorCaption": ""
