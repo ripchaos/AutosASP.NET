@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "orlDscd4tsgZ27yrrU0pOAAlZE62fshLeQdix8NgW84=",
+  "Hash": "5bvtx4Iyvf5mle6HSlaFbvVvE/PQyY8yAkDBaBhCUMM=",
   "Source": "Autos",
   "BasePath": "_content/Autos",
   "Mode": "Default",
@@ -59,6 +59,27 @@
       "OriginalItemSpec": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\Autos.bundle.scp.css"
     },
     {
+      "Identity": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\css\\Background.css",
+      "SourceId": "Autos",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\",
+      "BasePath": "_content/Autos",
+      "RelativePath": "css/Background#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "zwwxj5nzoa",
+      "Integrity": "43sxUdI/AuVuH5esi7gTcXE6xIt0NPCR+P9NNy55oJ4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\Background.css"
+    },
+    {
       "Identity": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\css\\site.css",
       "SourceId": "Autos",
       "SourceType": "Discovered",
@@ -78,6 +99,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\css\\styles.css",
+      "SourceId": "Autos",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\",
+      "BasePath": "_content/Autos",
+      "RelativePath": "css/styles#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "briwh4t7tf",
+      "Integrity": "CQgJrxwO2ceHq0t0TyHoHMzT74UlIEBcS6uVrj+Cd7g=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\styles.css"
     },
     {
       "Identity": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\favicon.ico",
@@ -1485,6 +1527,88 @@
       ]
     },
     {
+      "Route": "css/Background.css",
+      "AssetFile": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\css\\Background.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "81"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"43sxUdI/AuVuH5esi7gTcXE6xIt0NPCR+P9NNy55oJ4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 03 Apr 2025 02:08:59 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-43sxUdI/AuVuH5esi7gTcXE6xIt0NPCR+P9NNy55oJ4="
+        }
+      ]
+    },
+    {
+      "Route": "css/Background.zwwxj5nzoa.css",
+      "AssetFile": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\css\\Background.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "81"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"43sxUdI/AuVuH5esi7gTcXE6xIt0NPCR+P9NNy55oJ4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 03 Apr 2025 02:08:59 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "zwwxj5nzoa"
+        },
+        {
+          "Name": "label",
+          "Value": "css/Background.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-43sxUdI/AuVuH5esi7gTcXE6xIt0NPCR+P9NNy55oJ4="
+        }
+      ]
+    },
+    {
       "Route": "css/site.c2tiyv64ts.css",
       "AssetFile": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\css\\site.css",
       "Selectors": [],
@@ -1563,6 +1687,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-pAGv4ietcJNk/EwsQZ5BN9+K4MuNYS2a9wl4Jw+q9D0="
+        }
+      ]
+    },
+    {
+      "Route": "css/styles.briwh4t7tf.css",
+      "AssetFile": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\css\\styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1128"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"CQgJrxwO2ceHq0t0TyHoHMzT74UlIEBcS6uVrj+Cd7g=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 03 Apr 2025 01:50:49 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "briwh4t7tf"
+        },
+        {
+          "Name": "label",
+          "Value": "css/styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-CQgJrxwO2ceHq0t0TyHoHMzT74UlIEBcS6uVrj+Cd7g="
+        }
+      ]
+    },
+    {
+      "Route": "css/styles.css",
+      "AssetFile": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\wwwroot\\css\\styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1128"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"CQgJrxwO2ceHq0t0TyHoHMzT74UlIEBcS6uVrj+Cd7g=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 03 Apr 2025 01:50:49 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-CQgJrxwO2ceHq0t0TyHoHMzT74UlIEBcS6uVrj+Cd7g="
         }
       ]
     },
