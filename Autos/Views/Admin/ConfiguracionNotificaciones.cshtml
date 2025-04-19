@@ -1,0 +1,211 @@
+@model Autos.Models.ConfiguracionCorreo
+
+@{
+    ViewData["Title"] = "Configuración de Notificaciones";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Configuracion">Configuración</a></li>
+            <li class="breadcrumb-item active">Configuración de Notificaciones</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="fa-solid fa-envelope me-2"></i>Configuración de Correo Electrónico</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="GuardarConfiguracionCorreo" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="alert alert-info mb-4">
+                            <i class="fa-solid fa-info-circle me-2"></i>
+                            Configure los parámetros del servidor SMTP para el envío de correos electrónicos desde la aplicación.
+                        </div>
+
+                        <div class="row">
+                            <!-- Columna 1 -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Servidor" class="form-label">Servidor SMTP</label>
+                                    <input asp-for="Servidor" class="form-control" />
+                                    <span asp-validation-for="Servidor" class="text-danger"></span>
+                                    <div class="form-text">Por ejemplo: smtp.gmail.com, smtp.office365.com</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Puerto" class="form-label">Puerto</label>
+                                    <input asp-for="Puerto" class="form-control" type="number" />
+                                    <span asp-validation-for="Puerto" class="text-danger"></span>
+                                    <div class="form-text">Puertos comunes: 25, 465 (SSL), 587 (TLS)</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="RequiereSSL" class="form-label">Seguridad</label>
+                                    <div class="form-check">
+                                        <input asp-for="RequiereSSL" class="form-check-input" type="checkbox" />
+                                        <label asp-for="RequiereSSL" class="form-check-label">Utilizar SSL/TLS</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Columna 2 -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Usuario" class="form-label">Usuario/Email</label>
+                                    <input asp-for="Usuario" class="form-control" type="email" />
+                                    <span asp-validation-for="Usuario" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Password" class="form-label">Contraseña</label>
+                                    <input asp-for="Password" class="form-control" type="password" />
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                    <div class="form-text">En caso de Gmail, puede requerir una contraseña de aplicación.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="EmailRemitente" class="form-label">Email del Remitente</label>
+                                    <input asp-for="EmailRemitente" class="form-control" type="email" />
+                                    <span asp-validation-for="EmailRemitente" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="NombreRemitente" class="form-label">Nombre del Remitente</label>
+                                    <input asp-for="NombreRemitente" class="form-control" />
+                                    <span asp-validation-for="NombreRemitente" class="text-danger"></span>
+                                    <div class="form-text">Nombre que verán los destinatarios de los correos</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4" />
+                        
+                        <h3 class="mb-4">Notificaciones automáticas</h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Notificaciones para Clientes</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check mb-2">
+                                            <input asp-for="NotificarReservas" class="form-check-input" type="checkbox" />
+                                            <label asp-for="NotificarReservas" class="form-check-label">Enviar confirmación de reservas</label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-2">
+                                            <input asp-for="NotificarVentas" class="form-check-input" type="checkbox" />
+                                            <label asp-for="NotificarVentas" class="form-check-label">Enviar detalles de compra</label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-2">
+                                            <input asp-for="NotificarDescuentos" class="form-check-input" type="checkbox" />
+                                            <label asp-for="NotificarDescuentos" class="form-check-label">Enviar promociones y descuentos</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Notificaciones Internas</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check mb-2">
+                                            <input asp-for="NotificarNuevasReservas" class="form-check-input" type="checkbox" />
+                                            <label asp-for="NotificarNuevasReservas" class="form-check-label">Notificar nuevas reservas</label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-2">
+                                            <input asp-for="NotificarNuevasVentas" class="form-check-input" type="checkbox" />
+                                            <label asp-for="NotificarNuevasVentas" class="form-check-label">Notificar nuevas ventas</label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-2">
+                                            <input asp-for="NotificarSolicitudesDescuento" class="form-check-input" type="checkbox" />
+                                            <label asp-for="NotificarSolicitudesDescuento" class="form-check-label">Notificar solicitudes de descuento</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mb-2">
+                                    <label asp-for="EmailsNotificacionesInternas" class="form-label">Emails para notificaciones internas (separados por coma)</label>
+                                    <textarea asp-for="EmailsNotificacionesInternas" class="form-control" rows="2" placeholder="ejemplo@dominio.com, otro@dominio.com"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <button type="button" class="btn btn-info" id="btnProbarConexion">
+                                <i class="fa-solid fa-paper-plane me-2"></i>Probar Conexión
+                            </button>
+                            
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa-solid fa-save me-2"></i>Guardar Configuración
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+    $(document).ready(function() {
+        // Evento para probar la conexión SMTP
+        $("#btnProbarConexion").click(function() {
+            // Obtener los datos del formulario
+            var formData = {
+                servidor: $("#Servidor").val(),
+                puerto: $("#Puerto").val(),
+                usuario: $("#Usuario").val(),
+                password: $("#Password").val(),
+                requireSSL: $("#RequiereSSL").is(":checked"),
+                emailRemitente: $("#EmailRemitente").val(),
+                nombreRemitente: $("#NombreRemitente").val()
+            };
+            
+            // Deshabilitar el botón y mostrar spinner
+            var $btn = $(this);
+            $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Probando...');
+            $btn.prop("disabled", true);
+            
+            // Realizar la petición AJAX
+            $.ajax({
+                url: "@Url.Action("ProbarConexionSMTP", "Admin")",
+                type: "POST",
+                data: formData,
+                success: function(result) {
+                    if (result.success) {
+                        toastr.success(result.message, "Éxito");
+                    } else {
+                        toastr.error(result.message, "Error");
+                    }
+                },
+                error: function() {
+                    toastr.error("No se pudo realizar la prueba de conexión", "Error");
+                },
+                complete: function() {
+                    // Restaurar el botón
+                    $btn.html('<i class="fa-solid fa-paper-plane me-2"></i>Probar Conexión');
+                    $btn.prop("disabled", false);
+                }
+            });
+        });
+    });
+    </script>
+} 

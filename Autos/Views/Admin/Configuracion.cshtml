@@ -1,0 +1,139 @@
+@{
+    ViewData["Title"] = "Configuración del Sistema";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item active">Configuración del Sistema</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fa-solid fa-gears me-2"></i>Configuración Global del Sistema</h1>
+    </div>
+
+    <div class="row">
+        <!-- Configuración de Roles -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fa-solid fa-users-gear me-2"></i>Roles del Sistema
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Configure los roles disponibles en el sistema y sus permisos asociados.</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">Crear y modificar roles</li>
+                        <li class="list-group-item">Asignar permisos a roles</li>
+                        <li class="list-group-item">Gestionar jerarquía de roles</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-action="ConfiguracionRoles" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-gear me-2"></i>Configurar Roles
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Ventas -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fa-solid fa-money-bill-trend-up me-2"></i>Parámetros de Ventas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Ajuste los parámetros relacionados con ventas, descuentos y políticas comerciales.</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">Porcentajes de descuento permitidos</li>
+                        <li class="list-group-item">Flujo de aprobación de ventas</li>
+                        <li class="list-group-item">Políticas de cancelación</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-action="ConfiguracionVentas" class="btn btn-success w-100">
+                        <i class="fa-solid fa-gear me-2"></i>Configurar Ventas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Sucursales -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fa-solid fa-building me-2"></i>Sucursales
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Administre la información de las sucursales de la empresa.</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">Datos de contacto de sucursales</li>
+                        <li class="list-group-item">Horarios de atención</li>
+                        <li class="list-group-item">Asignación de personal</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-action="ConfiguracionSucursales" class="btn btn-info w-100">
+                        <i class="fa-solid fa-gear me-2"></i>Configurar Sucursales
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Métricas -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fa-solid fa-chart-line me-2"></i>Métricas y Estadísticas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Visualice y configure las métricas de rendimiento del sistema.</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">Estadísticas de ventas</li>
+                        <li class="list-group-item">Rendimiento por sucursal</li>
+                        <li class="list-group-item">Actividad de usuarios</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-action="ConfiguracionMetricas" class="btn btn-warning w-100">
+                        <i class="fa-solid fa-gear me-2"></i>Ver Métricas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Notificaciones -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fa-solid fa-bell me-2"></i>Notificaciones
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Configure el sistema de notificaciones y alertas de la aplicación.</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">Notificaciones por correo</li>
+                        <li class="list-group-item">Alertas del sistema</li>
+                        <li class="list-group-item">Recordatorios automáticos</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-action="ConfiguracionNotificaciones" class="btn btn-danger w-100">
+                        <i class="fa-solid fa-gear me-2"></i>Configurar Notificaciones
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

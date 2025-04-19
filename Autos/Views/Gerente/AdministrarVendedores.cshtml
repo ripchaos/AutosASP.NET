@@ -1,0 +1,126 @@
+@model Autos.Models.AdministrarVendedoresViewModel
+@{
+    ViewData["Title"] = "Administrar Vendedores";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0"><i class="fas fa-users-cog me-2"></i>Administrar Vendedores</h2>
+                <a asp-action="Dashboard" class="btn btn-light"><i class="fas fa-chart-line me-2"></i>Volver al Dashboard</a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger mb-4">@TempData["Error"]</div>
+            }
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success mb-4">@TempData["Success"]</div>
+            }
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información de Sucursal</h5>
+                        </div>
+                        <div class="card-body">
+                            <h4>@Model.Sucursal.Nombre</h4>
+                            <p><i class="fas fa-map-marker-alt me-2"></i>@Model.Sucursal.Direccion</p>
+                            @if (!string.IsNullOrEmpty(Model.Sucursal.Telefono))
+                            {
+                                <p><i class="fas fa-phone me-2"></i>@Model.Sucursal.Telefono</p>
+                            }
+                            <hr />
+                            <div class="alert alert-primary">
+                                <p class="mb-1"><strong>Vendedores Asignados:</strong> @Model.VendedoresAsignados.Count</p>
+                                <p class="mb-0">
+                                    <span class="badge bg-success me-1">@Model.VendedoresAsignados.Count(v => v.Activo)</span> Activos
+                                    <span class="badge bg-secondary ms-1">@Model.VendedoresAsignados.Count(v => !v.Activo)</span> Inactivos
+                                </p>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span>Para asignar nuevos vendedores a esta sucursal, contacte al administrador del sistema.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Vendedores Asignados a Su Sucursal</h5>
+                </div>
+                <div class="card-body">
+                    @if (!Model.VendedoresAsignados.Any())
+                    {
+                        <div class="alert alert-info">
+                            <p class="mb-0">No hay vendedores asignados a su sucursal.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Vendedor</th>
+                                        <th>Email</th>
+                                        <th>Estatus</th>
+                                        <th>¿Principal?</th>
+                                        <th>Fecha Asignación</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var asignacion in Model.VendedoresAsignados)
+                                    {
+                                        <tr>
+                                            <td>@(asignacion.Usuario?.Nombre ?? "Usuario Desconocido")</td>
+                                            <td>@(asignacion.Usuario?.Email ?? "Sin correo")</td>
+                                            <td>
+                                                @if (asignacion.Activo)
+                                                {
+                                                    <span class="badge bg-success">Activo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inactivo</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (asignacion.EsPrincipal)
+                                                {
+                                                    <span class="badge bg-primary">Principal</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-light text-dark">No</span>
+                                                }
+                                            </td>
+                                            <td>@asignacion.FechaAsignacion.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <form asp-action="DesasignarVendedor" method="post" style="display: inline;">
+                                                    <input type="hidden" name="asignacionId" value="@asignacion.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-danger"
+                                                            onclick="return confirm('¿Está seguro de desasignar a este vendedor?');">
+                                                        <i class="fas fa-user-minus"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

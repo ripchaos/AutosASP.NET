@@ -1,0 +1,259 @@
+@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityRole>
+
+@{
+    ViewData["Title"] = "Configuración de Roles";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Configuracion">Configuración</a></li>
+            <li class="breadcrumb-item active">Roles del Sistema</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fa-solid fa-users-gear me-2"></i>Roles del Sistema</h1>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#crearRolModal">
+            <i class="fa-solid fa-plus me-2"></i>Crear Nuevo Rol
+        </button>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Roles Disponibles</h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Usuarios Asignados</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var rol in Model)
+                        {
+                            <tr>
+                                <td>@rol.Name</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-info" onclick="cargarUsuariosPorRol('@rol.Id', '@rol.Name')">
+                                        <i class="fa-solid fa-users me-1"></i>Ver Usuarios
+                                    </button>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editarRolModal" 
+                                                onclick="prepararEdicion('@rol.Id', '@rol.Name')">
+                                            <i class="fa-solid fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarRolModal" 
+                                                onclick="prepararEliminacion('@rol.Id', '@rol.Name')">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Permisos por Rol</h4>
+                </div>
+                <div class="card-body">
+                    <p>Configure los permisos específicos para cada rol:</p>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Administrador</strong>: Acceso completo al sistema</span>
+                            <span class="badge bg-success rounded-pill">Nivel 1</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Gerente</strong>: Gestión de ventas y descuentos</span>
+                            <span class="badge bg-success rounded-pill">Nivel 2</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Vendedor</strong>: Registro de ventas y solicitudes</span>
+                            <span class="badge bg-warning rounded-pill">Nivel 3</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Recepcionista</strong>: Registro de clientes</span>
+                            <span class="badge bg-warning rounded-pill">Nivel 3</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Cliente</strong>: Consulta de catálogo y reservas</span>
+                            <span class="badge bg-info rounded-pill">Nivel 4</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Usuarios por Rol</h4>
+                </div>
+                <div class="card-body">
+                    <div id="usuariosPorRolContainer">
+                        <p class="text-center text-muted">Seleccione un rol para ver los usuarios asignados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Crear Rol -->
+<div class="modal fade" id="crearRolModal" tabindex="-1" aria-labelledby="crearRolModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CrearRol" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="crearRolModalLabel">
+                        <i class="fa-solid fa-plus me-2"></i>Crear Nuevo Rol
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nombreRol" class="form-label">Nombre del Rol</label>
+                        <input type="text" class="form-control" id="nombreRol" name="nombreRol" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear Rol</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Rol -->
+<div class="modal fade" id="editarRolModal" tabindex="-1" aria-labelledby="editarRolModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="EditarRol" method="post">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="editarRolModalLabel">
+                        <i class="fa-solid fa-edit me-2"></i>Editar Rol
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editRolId" name="rolId">
+                    <div class="mb-3">
+                        <label for="editNombreRol" class="form-label">Nombre del Rol</label>
+                        <input type="text" class="form-control" id="editNombreRol" name="nombreRol" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Eliminar Rol -->
+<div class="modal fade" id="eliminarRolModal" tabindex="-1" aria-labelledby="eliminarRolModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="EliminarRol" method="post">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="eliminarRolModalLabel">
+                        <i class="fa-solid fa-trash me-2"></i>Eliminar Rol
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="deleteRolId" name="rolId">
+                    <div class="alert alert-danger">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                        ¿Está seguro que desea eliminar el rol <strong id="deleteRolName"></strong>?
+                        <p class="mt-2">Esta acción no se puede deshacer y podría afectar a los usuarios asignados a este rol.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar Rol</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function prepararEdicion(id, nombre) {
+            document.getElementById('editRolId').value = id;
+            document.getElementById('editNombreRol').value = nombre;
+        }
+        
+        function prepararEliminacion(id, nombre) {
+            document.getElementById('deleteRolId').value = id;
+            document.getElementById('deleteRolName').textContent = nombre;
+        }
+        
+        function cargarUsuariosPorRol(rolId, rolName) {
+            const container = document.getElementById('usuariosPorRolContainer');
+            container.innerHTML = '<div class="spinner-border text-success" role="status"><span class="visually-hidden">Cargando...</span></div>';
+            
+            // Realizar una petición AJAX para obtener los usuarios con este rol
+            fetch(`/Admin/ObtenerUsuariosPorRol?rolId=${rolId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener usuarios');
+                    }
+                    return response.json();
+                })
+                .then(usuarios => {
+                    if (usuarios.length === 0) {
+                        container.innerHTML = `
+                            <div class="alert alert-info">
+                                <i class="fa-solid fa-info-circle me-2"></i>
+                                No hay usuarios asignados al rol <strong>${rolName}</strong>.
+                            </div>
+                        `;
+                    } else {
+                        let html = `
+                            <div class="alert alert-success">
+                                <i class="fa-solid fa-users me-2"></i>
+                                <strong>Usuarios con el rol ${rolName}:</strong>
+                                <ul class="mt-2 mb-0">`;
+                        
+                        usuarios.forEach(usuario => {
+                            html += `<li>${usuario.nombre} - ${usuario.email}</li>`;
+                        });
+                        
+                        html += `
+                                </ul>
+                            </div>
+                        `;
+                        
+                        container.innerHTML = html;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    container.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                            Error al cargar los usuarios: ${error.message}
+                        </div>
+                    `;
+                });
+        }
+    </script>
+} 

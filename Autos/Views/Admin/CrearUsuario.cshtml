@@ -1,0 +1,105 @@
+@model Autos.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Crear Usuario";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item active">Crear Usuario</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-user-plus me-2"></i>Crear Nuevo Usuario
+            </h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="CrearUsuario" method="post" id="crearUsuarioForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                <input asp-for="Nombre" class="form-control" placeholder="Ingrese nombre completo" />
+                            </div>
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Identificacion" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                                <input asp-for="Identificacion" class="form-control" placeholder="Ej: 12345678" />
+                            </div>
+                            <span asp-validation-for="Identificacion" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                                <input asp-for="Email" class="form-control" placeholder="ejemplo@correo.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Direccion" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+                                <input asp-for="Direccion" class="form-control" placeholder="Ingrese dirección completa" />
+                            </div>
+                            <span asp-validation-for="Direccion" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input asp-for="Password" type="password" class="form-control" placeholder="Ingrese contraseña" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Rol" class="form-label">Rol del Usuario</label>
+                            <select asp-for="Rol" class="form-select">
+                                <option value="">-- Seleccione un rol --</option>
+                                <option value="Gerente">Gerente</option>
+                                <option value="Vendedor">Vendedor</option>
+                                <option value="Recepcionista">Recepcionista</option>
+                                <option value="Cliente">Cliente</option>
+                            </select>
+                            <span asp-validation-for="Rol" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="d-flex justify-content-between">
+                <a asp-controller="Admin" asp-action="Usuarios" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="crearUsuarioForm" class="btn btn-success">
+                    <i class="fa-solid fa-save me-1"></i>Crear Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

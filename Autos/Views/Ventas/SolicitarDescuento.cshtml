@@ -1,0 +1,135 @@
+@model Autos.Models.Auto
+@using Autos.Models.Utils
+@{
+    ViewData["Title"] = "Solicitar Descuento";
+    decimal porcentajeMaximo = ViewBag.PorcentajeMaximo ?? 10;
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Autos" asp-action="Index">Catálogo</a></li>
+            <li class="breadcrumb-item active">Solicitar Descuento</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-percent me-2"></i>Solicitar Descuento
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fa-solid fa-info-circle me-2"></i>
+                <strong>Información:</strong> Puede aplicar hasta <strong>@porcentajeMaximo%</strong> de descuento sin autorización. 
+                Para descuentos mayores, su solicitud será enviada al gerente para aprobación.
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Detalles del Auto</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Marca:</strong> @Model.Marca</p>
+                            <p><strong>Modelo:</strong> @Model.Modelo</p>
+                            <p><strong>Año:</strong> @Model.Anio</p>
+                            <p><strong>Precio:</strong> <span class="text-success fw-bold">@CurrencyFormatter.FormatCRC(Model.Precio)</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <form asp-action="SolicitarDescuento" method="post" id="descuentoForm">
+                        <input type="hidden" name="autoId" value="@Model.Id" />
+                        <input type="hidden" id="precioOriginal" value="@Model.Precio" />
+                        <input type="hidden" id="porcentajeMaximoPermitido" value="@porcentajeMaximo" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Porcentaje de Descuento Solicitado</label>
+                            <div class="input-group mb-3">
+                                <input name="porcentajeSolicitado" id="porcentajeInput" class="form-control" type="number" min="0" max="100" step="0.01" value="@porcentajeMaximo" required />
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <div class="form-text">
+                                <span class="text-success">Descuento automático hasta @porcentajeMaximo%</span><br/>
+                                <span class="text-warning">Requiere autorización: más de @porcentajeMaximo%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Precio después de descuento</label>
+                            <div class="form-control bg-light py-2 fw-bold text-success" id="precioFinalContainer">
+                                ₡0
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Justificación (opcional)</label>
+                            <textarea name="justificacion" class="form-control" rows="3" placeholder="Explique el motivo del descuento..."></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="d-flex justify-content-between">
+                <a asp-controller="Autos" asp-action="Index" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Volver al Catálogo
+                </a>
+                <button type="submit" form="descuentoForm" class="btn btn-primary">
+                    <i class="fa-solid fa-check-circle me-1"></i>Solicitar Descuento
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener elementos y valores de entrada
+            const precioFinalContainer = document.getElementById('precioFinalContainer');
+            const porcentajeInput = document.getElementById('porcentajeInput');
+            const precioOriginal = parseFloat(document.getElementById('precioOriginal').value);
+            const porcentajeMaximo = parseFloat(document.getElementById('porcentajeMaximoPermitido').value);
+            
+            function formatoCRC(monto) {
+                return '₡' + monto.toLocaleString('es-CR', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+            }
+            
+            function calcularPrecioConDescuento() {
+                // Obtener el porcentaje ingresado por el usuario
+                const porcentaje = parseFloat(porcentajeInput.value) || 0;
+                
+                // Calcular el descuento y el precio final
+                const descuento = precioOriginal * (porcentaje / 100);
+                const precioFinal = precioOriginal - descuento;
+                
+                // Actualizar el texto con el precio formateado
+                precioFinalContainer.textContent = formatoCRC(precioFinal);
+                
+                // Actualizar color según si requiere autorización
+                if (porcentaje > porcentajeMaximo) {
+                    precioFinalContainer.classList.remove('text-success');
+                    precioFinalContainer.classList.add('text-warning');
+                } else {
+                    precioFinalContainer.classList.remove('text-warning');
+                    precioFinalContainer.classList.add('text-success');
+                }
+            }
+            
+            // Calcular inicialmente
+            calcularPrecioConDescuento();
+            
+            // Agregar evento para recalcular cuando cambie el porcentaje
+            porcentajeInput.addEventListener('input', calcularPrecioConDescuento);
+        });
+    </script>
+} 

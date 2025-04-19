@@ -1,0 +1,102 @@
+@model Autos.Models.Sucursal
+
+@{
+    ViewData["Title"] = "Crear Sucursal";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Configuracion">Configuración</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="ConfiguracionSucursales">Sucursales</a></li>
+            <li class="breadcrumb-item active">Crear Sucursal</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-building-circle-plus me-2"></i>Crear Nueva Sucursal
+            </h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="CrearSucursal" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" required />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Direccion" class="form-label"></label>
+                        <input asp-for="Direccion" class="form-control" required />
+                        <span asp-validation-for="Direccion" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Ubicacion" class="form-label"></label>
+                        <input asp-for="Ubicacion" class="form-control" placeholder="Ej: Zona Norte, Centro Comercial, etc." />
+                        <span asp-validation-for="Ubicacion" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="GerenteId" class="form-label"></label>
+                        @if (ViewBag.Gerentes != null && ViewBag.Gerentes.Count > 0)
+                        {
+                            <select asp-for="GerenteId" class="form-select" asp-items="ViewBag.Gerentes">
+                                <option value="">-- Seleccione un Gerente --</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <select asp-for="GerenteId" class="form-select" disabled>
+                                <option value="">No hay gerentes disponibles</option>
+                            </select>
+                            <div class="form-text text-warning">
+                                <i class="fa-solid fa-exclamation-triangle me-1"></i>
+                                No hay gerentes disponibles. Todos los gerentes ya están asignados a sucursales o no hay usuarios con el rol de Gerente.
+                            </div>
+                        }
+                        <span asp-validation-for="GerenteId" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input asp-for="Activa" class="form-check-input" />
+                    <label asp-for="Activa" class="form-check-label"></label>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="ConfiguracionSucursales" class="btn btn-secondary">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Volver
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-save me-2"></i>Guardar Sucursal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Inicializar con el estado activo por defecto
+        $(document).ready(function() {
+            $("#Activa").prop("checked", true);
+        });
+    </script>
+} 

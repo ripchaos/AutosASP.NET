@@ -1,0 +1,398 @@
+@{
+    ViewData["Title"] = "Métricas y Estadísticas";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item active">Métricas y Estadísticas</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Resumen de estadísticas -->
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="fa-solid fa-chart-line me-2"></i>Estadísticas Generales</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="display-4 fw-bold text-primary">@ViewBag.TotalUsuarios</h3>
+                                    <p class="mb-0 text-muted">Usuarios Registrados</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="display-4 fw-bold text-success">@ViewBag.TotalVentas</h3>
+                                    <p class="mb-0 text-muted">Ventas Realizadas</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="display-4 fw-bold text-warning">@ViewBag.TotalAutos</h3>
+                                    <p class="mb-0 text-muted">Autos en Inventario</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="display-4 fw-bold text-info">@ViewBag.TotalReservas</h3>
+                                    <p class="mb-0 text-muted">Reservas Activas</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Gráfico de Ventas por Mes -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="fa-solid fa-chart-column me-2"></i>Ventas por Mes</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="ventasPorMesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Ventas por Vendedor -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0"><i class="fa-solid fa-users me-2"></i>Ventas por Vendedor</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="vendedoresChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Gráfico de Ventas por Sucursal -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="fa-solid fa-building me-2"></i>Ventas por Sucursal</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="sucursalesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Usuarios por Rol -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="mb-0"><i class="fa-solid fa-user-tag me-2"></i>Usuarios por Rol</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="usuariosPorRolChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Gráfico comparativo de Reservas vs Nuevos Clientes -->
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fa-solid fa-chart-area me-2"></i>Evolución Mensual</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="evolucionMensualChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Incluir Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuración común
+            Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif";
+            Chart.defaults.font.size = 13;
+            Chart.defaults.color = '#666';
+            
+            // Colores
+            const colores = {
+                azul: 'rgba(54, 162, 235, 0.8)',
+                azulBorde: 'rgba(54, 162, 235, 1)',
+                verde: 'rgba(75, 192, 92, 0.8)',
+                verdeBorde: 'rgba(75, 192, 92, 1)',
+                rojo: 'rgba(255, 99, 132, 0.8)',
+                rojoBorde: 'rgba(255, 99, 132, 1)',
+                amarillo: 'rgba(255, 205, 86, 0.8)',
+                amarilloBorde: 'rgba(255, 205, 86, 1)',
+                purpura: 'rgba(153, 102, 255, 0.8)',
+                purpuraBorde: 'rgba(153, 102, 255, 1)',
+                naranja: 'rgba(255, 159, 64, 0.8)',
+                naranjaBorde: 'rgba(255, 159, 64, 1)'
+            };
+            
+            // 1. Gráfico de Ventas por Mes
+            const mesesLabels = @Html.Raw(Json.Serialize(ViewBag.MesesLabels ?? new string[] {}));
+            const ventasPorMesData = @Html.Raw(Json.Serialize(ViewBag.VentasPorMes ?? new int[] {}));
+            const montosPorMesData = @Html.Raw(Json.Serialize(ViewBag.MontosPorMes ?? new double[] {}));
+            
+            new Chart(
+                document.getElementById('ventasPorMesChart'),
+                {
+                    type: 'bar',
+                    data: {
+                        labels: mesesLabels,
+                        datasets: [
+                            {
+                                label: 'Cantidad de Ventas',
+                                data: ventasPorMesData,
+                                backgroundColor: colores.azul,
+                                borderColor: colores.azulBorde,
+                                borderWidth: 1,
+                                yAxisID: 'y',
+                            },
+                            {
+                                label: 'Monto Total (€)',
+                                data: montosPorMesData,
+                                backgroundColor: colores.verde,
+                                borderColor: colores.verdeBorde,
+                                borderWidth: 1,
+                                type: 'line',
+                                yAxisID: 'y1',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Cantidad de Ventas'
+                                }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Monto (€)'
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+            
+            // 2. Gráfico de Ventas por Vendedor
+            const vendedoresLabels = @Html.Raw(Json.Serialize(ViewBag.VendedoresLabels ?? new string[] {}));
+            const vendedoresCantidad = @Html.Raw(Json.Serialize(ViewBag.VendedoresCantidad ?? new int[] {}));
+            const vendedoresMonto = @Html.Raw(Json.Serialize(ViewBag.VendedoresMonto ?? new double[] {}));
+            
+            new Chart(
+                document.getElementById('vendedoresChart'),
+                {
+                    type: 'bar',
+                    data: {
+                        labels: vendedoresLabels,
+                        datasets: [
+                            {
+                                label: 'Ventas Realizadas',
+                                data: vendedoresCantidad,
+                                backgroundColor: colores.purpura,
+                                borderColor: colores.purpuraBorde,
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                }
+            );
+            
+            // 3. Gráfico de Ventas por Sucursal
+            const sucursalesLabels = @Html.Raw(Json.Serialize(ViewBag.SucursalesLabels ?? new string[] {}));
+            const ventasPorSucursal = @Html.Raw(Json.Serialize(ViewBag.VentasPorSucursal ?? new int[] {}));
+            const montosPorSucursal = @Html.Raw(Json.Serialize(ViewBag.MontosPorSucursal ?? new double[] {}));
+            
+            new Chart(
+                document.getElementById('sucursalesChart'),
+                {
+                    type: 'pie',
+                    data: {
+                        labels: sucursalesLabels,
+                        datasets: [
+                            {
+                                data: montosPorSucursal,
+                                backgroundColor: [
+                                    colores.azul,
+                                    colores.verde,
+                                    colores.rojo,
+                                    colores.amarillo,
+                                    colores.purpura,
+                                    colores.naranja
+                                ],
+                                borderColor: [
+                                    colores.azulBorde,
+                                    colores.verdeBorde,
+                                    colores.rojoBorde,
+                                    colores.amarilloBorde,
+                                    colores.purpuraBorde,
+                                    colores.naranjaBorde
+                                ],
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        let value = context.raw || 0;
+                                        return label + ': ' + value.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+            
+            // 4. Gráfico de Usuarios por Rol
+            new Chart(
+                document.getElementById('usuariosPorRolChart'),
+                {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Administradores', 'Gerentes', 'Vendedores', 'Recepcionistas', 'Clientes'],
+                        datasets: [
+                            {
+                                data: [
+                                    @ViewBag.TotalAdministradores, 
+                                    @ViewBag.TotalGerentes, 
+                                    @ViewBag.TotalVendedores, 
+                                    @ViewBag.TotalRecepcionistas, 
+                                    @ViewBag.TotalClientes
+                                ],
+                                backgroundColor: [
+                                    colores.rojo,
+                                    colores.azul,
+                                    colores.verde,
+                                    colores.amarillo,
+                                    colores.purpura
+                                ],
+                                borderColor: [
+                                    colores.rojoBorde,
+                                    colores.azulBorde,
+                                    colores.verdeBorde,
+                                    colores.amarilloBorde,
+                                    colores.purpuraBorde
+                                ],
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            }
+                        }
+                    }
+                }
+            );
+            
+            // 5. Gráfico comparativo de Reservas vs Nuevos Clientes
+            const reservasPorMes = @Html.Raw(Json.Serialize(ViewBag.ReservasPorMes ?? new int[] {}));
+            const clientesNuevosPorMes = @Html.Raw(Json.Serialize(ViewBag.ClientesNuevosPorMes ?? new int[] {}));
+            
+            new Chart(
+                document.getElementById('evolucionMensualChart'),
+                {
+                    type: 'line',
+                    data: {
+                        labels: mesesLabels,
+                        datasets: [
+                            {
+                                label: 'Reservas',
+                                data: reservasPorMes,
+                                backgroundColor: colores.azul,
+                                borderColor: colores.azulBorde,
+                                tension: 0.4,
+                                fill: false
+                            },
+                            {
+                                label: 'Ventas',
+                                data: ventasPorMesData,
+                                backgroundColor: colores.verde,
+                                borderColor: colores.verdeBorde,
+                                tension: 0.4,
+                                fill: false
+                            },
+                            {
+                                label: 'Nuevos Clientes',
+                                data: clientesNuevosPorMes,
+                                backgroundColor: colores.amarillo,
+                                borderColor: colores.amarilloBorde,
+                                tension: 0.4,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            );
+        });
+    </script>
+} 

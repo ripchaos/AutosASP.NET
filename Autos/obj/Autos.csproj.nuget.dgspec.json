@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\Autos.csproj": {}
+    "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Autos.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\Autos.csproj": {
+    "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Autos.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\Autos.csproj",
+        "projectUniqueName": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Autos.csproj",
         "projectName": "Autos",
-        "projectPath": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\Autos.csproj",
-        "packagesPath": "C:\\Users\\jmari\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jmari\\OneDrive\\Documentos\\GitHub\\AutosASP.NET\\Autos\\obj\\",
+        "projectPath": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Autos.csproj",
+        "packagesPath": "C:\\Users\\Rip\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\jmari\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Rip\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -44,7 +44,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -88,7 +88,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -1,0 +1,259 @@
+@model List<Autos.Models.VendedorVentasViewModel>
+@{
+    ViewData["Title"] = "Ventas por Vendedor";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0"><i class="fas fa-users me-2"></i>Ventas por Vendedor</h2>
+                <a asp-action="AdministrarVendedores" class="btn btn-light"><i class="fas fa-cog me-2"></i>Administrar Vendedores</a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger mb-4">@TempData["Error"]</div>
+            }
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success mb-4">@TempData["Success"]</div>
+            }
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    <p class="mb-0">No hay vendedores asignados a esta sucursal.</p>
+                </div>
+            }
+            else
+            {
+                <div class="row mb-4">
+                    <!-- Gráfico circular de ventas por vendedor -->
+                    <div class="col-md-6">
+                        <div class="card shadow h-100">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Distribución de Ventas</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="ventasPorVendedorChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de barras para montos totales -->
+                    <div class="col-md-6">
+                        <div class="card shadow h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Montos por Vendedor</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="montosPorVendedorChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Vendedor</th>
+                                <th>¿Principal?</th>
+                                <th>Total Ventas</th>
+                                <th>Monto Total</th>
+                                <th>Última Venta</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar me-2 bg-primary rounded-circle text-white">
+                                                <span>@(item.Vendedor?.Nombre.Substring(0, 1).ToUpper() ?? "?")</span>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">@(item.Vendedor?.Nombre ?? "Usuario Desconocido")</div>
+                                                <small class="text-muted">@(item.Vendedor?.Email ?? "Sin correo")</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (item.EsPrincipal)
+                                        {
+                                            <span class="badge bg-success">Principal</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">No</span>
+                                        }
+                                    </td>
+                                    <td>@item.TotalVentas</td>
+                                    <td>₡@item.MontoTotal.ToString("N0")</td>
+                                    <td>
+                                        @if (item.UltimaVenta != null)
+                                        {
+                                            <span title="@item.UltimaVenta.Fecha.ToString("dd/MM/yyyy HH:mm")">
+                                                @item.UltimaVenta.Fecha.ToString("dd/MM/yyyy")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin ventas</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Vendedor != null)
+                                        {
+                                            <a href="#" class="btn btn-sm btn-outline-primary" 
+                                               onclick="verDetalleVendedor('@item.Vendedor.Id')">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const vendedores = @Html.Raw(Json.Serialize(Model.Select(v => v.Vendedor?.Nombre ?? "Sin nombre").ToList()));
+            const totalVentas = @Html.Raw(Json.Serialize(Model.Select(v => v.TotalVentas).ToList()));
+            const montoTotal = @Html.Raw(Json.Serialize(Model.Select(v => v.MontoTotal).ToList()));
+            
+            if (vendedores.length > 0) {
+                // Gráfico circular
+                const ctxPie = document.getElementById('ventasPorVendedorChart').getContext('2d');
+                new Chart(ctxPie, {
+                    type: 'pie',
+                    data: {
+                        labels: vendedores,
+                        datasets: [{
+                            data: totalVentas,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(153, 102, 255, 0.7)',
+                                'rgba(255, 159, 64, 0.7)',
+                                'rgba(199, 199, 199, 0.7)',
+                                'rgba(83, 102, 255, 0.7)',
+                                'rgba(40, 159, 64, 0.7)',
+                                'rgba(210, 199, 199, 0.7)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Cantidad de Ventas por Vendedor'
+                            }
+                        }
+                    }
+                });
+                
+                // Gráfico de barras
+                const ctxBar = document.getElementById('montosPorVendedorChart').getContext('2d');
+                new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: vendedores,
+                        datasets: [{
+                            label: 'Monto Total (₡)',
+                            data: montoTotal,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgb(54, 162, 235)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Monto Total (₡)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        
+        function verDetalleVendedor(id) {
+            $.ajax({
+                url: '@Url.Action("DetalleVendedor", "Gerente")',
+                type: 'GET',
+                data: { id: id },
+                success: function (result) {
+                    $('#modalContenedor').html(result);
+                    $('#modalDetalleVendedor').modal('show');
+                },
+                error: function (error) {
+                    console.error('Error al cargar detalles del vendedor:', error);
+                    alert('No se pudieron cargar los detalles del vendedor. Por favor, intente de nuevo.');
+                }
+            });
+        }
+    </script>
+    
+    <style>
+        .avatar {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+    
+    <!-- Modal para detalles del vendedor -->
+    <div id="modalContenedor">
+        <div class="modal fade" id="modalDetalleVendedor" tabindex="-1" role="dialog" aria-labelledby="detalleVendedorLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detalleVendedorLabel">Detalle del Vendedor</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- El contenido se cargará con AJAX -->
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only">Cargando...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+} 

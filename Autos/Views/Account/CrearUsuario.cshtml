@@ -1,54 +1,119 @@
-﻿@model RegisterViewModel
+﻿@model Autos.Models.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Registrar Usuario";
+    ViewData["Title"] = "Registrar Cliente";
 }
 
-<h2 class="text-center">Registrar Usuario</h2>
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item active">Registrar Cliente</li>
+        </ol>
+    </nav>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-
-<form asp-action="CrearUsuario" method="post">
-    <div class="form-group">
-        <label for="Nombre">Nombre</label>
-        <input asp-for="Nombre" class="form-control" required />
-        <span asp-validation-for="Nombre" class="text-danger"></span>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-user-plus me-2"></i>Registrar Nuevo Cliente
+            </h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="CrearUsuario" method="post" id="crearUsuarioForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                <input asp-for="Nombre" class="form-control" placeholder="Ingrese nombre completo" />
+                            </div>
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Identificacion" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                                <input asp-for="Identificacion" class="form-control" placeholder="Ej: 12345678" />
+                            </div>
+                            <span asp-validation-for="Identificacion" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                                <input asp-for="Email" class="form-control" placeholder="ejemplo@correo.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Direccion" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+                                <input asp-for="Direccion" class="form-control" placeholder="Ingrese dirección completa" />
+                            </div>
+                            <span asp-validation-for="Direccion" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input asp-for="Password" type="password" class="form-control" placeholder="Ingrese contraseña" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="AutoInteresadoId" class="form-label"></label>
+                            <select asp-for="AutoInteresadoId" class="form-select" asp-items="ViewBag.Autos">
+                                <option value="">-- Seleccione un auto --</option>
+                            </select>
+                            <span asp-validation-for="AutoInteresadoId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" asp-for="Rol" value="Cliente" />
+                
+                @if (User.IsInRole("Administrador"))
+                {
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="asignarAccesoCompleto" name="asignarAccesoCompleto" value="true">
+                                <label class="form-check-label" for="asignarAccesoCompleto">
+                                    <span class="text-danger fw-bold">Asignar acceso completo al sistema</span> (solo para pruebas)
+                                </label>
+                                <div class="form-text">
+                                    Esta opción asignará todos los roles al usuario (Cliente, Vendedor, Gerente y Recepcionista).
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </form>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="d-flex justify-content-between">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="crearUsuarioForm" class="btn btn-success">
+                    <i class="fa-solid fa-save me-1"></i>Registrar Cliente
+                </button>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label for="Email">Email</label>
-        <input asp-for="Email" type="email" class="form-control" required />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="Password">Contraseña</label>
-        <input asp-for="Password" type="password" class="form-control" required />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="Rol">Rol</label>
-        <select asp-for="Rol" class="form-select" required>
-            <option value="">Seleccione un rol</option>
-            <option value="Recepcionista">Recepcionista</option>
-            <option value="Vendedor">Vendedor</option>
-            <option value="Gerente">Gerente</option>
-        </select>
-        <span asp-validation-for="Rol" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary mt-3">Registrar Usuario</button>
-</form>
+</div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

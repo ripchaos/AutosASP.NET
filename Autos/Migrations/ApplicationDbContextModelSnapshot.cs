@@ -17,7 +17,7 @@ namespace Autos.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.3")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -33,8 +33,26 @@ namespace Autos.Migrations
                     b.Property<int>("Anio")
                         .HasColumnType("int");
 
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<bool>("Disponibilidad")
                         .HasColumnType("bit");
+
+                    b.Property<string>("EstadoReserva")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("FechaFinReserva")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Marca")
                         .IsRequired()
@@ -46,6 +64,10 @@ namespace Autos.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<decimal>("PorcentajeDescuento")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
                     b.Property<decimal>("Precio")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -53,11 +75,74 @@ namespace Autos.Migrations
                     b.Property<int>("SucursalId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("TieneDescuento")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SucursalId");
 
                     b.ToTable("Autos");
+                });
+
+            modelBuilder.Entity("Autos.Models.ConfiguracionCorreo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EmailRemitente")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmailsNotificacionesInternas")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NombreRemitente")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("NotificarDescuentos")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotificarNuevasReservas")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotificarNuevasVentas")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotificarReservas")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotificarSolicitudesDescuento")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotificarVentas")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Puerto")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("RequiereSSL")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Servidor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Usuario")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ConfiguracionCorreo");
                 });
 
             modelBuilder.Entity("Autos.Models.DescuentoConfig", b =>
@@ -75,6 +160,43 @@ namespace Autos.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DescuentosConfig");
+                });
+
+            modelBuilder.Entity("Autos.Models.ListaEspera", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AutoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comentarios")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("FechaNotificacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaSolicitud")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Notificado")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AutoId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("ListaEspera");
                 });
 
             modelBuilder.Entity("Autos.Models.Reserva", b =>
@@ -104,6 +226,54 @@ namespace Autos.Migrations
                     b.ToTable("Reservas");
                 });
 
+            modelBuilder.Entity("Autos.Models.SolicitudDescuento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool?>("Aprobada")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("AutoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ComentarioGerente")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("FechaResolucion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaSolicitud")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GerenteId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Justificacion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("PorcentajeSolicitado")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("VendedorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AutoId");
+
+                    b.HasIndex("GerenteId");
+
+                    b.HasIndex("VendedorId");
+
+                    b.ToTable("SolicitudesDescuento");
+                });
+
             modelBuilder.Entity("Autos.Models.Sucursal", b =>
                 {
                     b.Property<int>("Id")
@@ -112,17 +282,37 @@ namespace Autos.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Activa")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Direccion")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("GerenteId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("HorarioAtencion")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Telefono")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Ubicacion")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("GerenteId");
 
                     b.ToTable("Sucursales");
                 });
@@ -135,9 +325,16 @@ namespace Autos.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<int?>("AutoInteresadoId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Direccion")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -145,6 +342,13 @@ namespace Autos.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Identificacion")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -188,7 +392,12 @@ namespace Autos.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("VendedorAsignadoId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AutoInteresadoId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -198,7 +407,42 @@ namespace Autos.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("VendedorAsignadoId");
+
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Autos.Models.UsuarioSucursal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EsPrincipal")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("FechaAsignacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SucursalId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SucursalId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("UsuariosSucursales");
                 });
 
             modelBuilder.Entity("Autos.Models.Venta", b =>
@@ -212,14 +456,22 @@ namespace Autos.Migrations
                     b.Property<int>("AutoId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FechaVenta")
+                    b.Property<string>("ClienteId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Monto")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("UsuarioId")
+                    b.Property<decimal>("PorcentajeDescuento")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("VendedorId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -227,7 +479,9 @@ namespace Autos.Migrations
 
                     b.HasIndex("AutoId");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("ClienteId");
+
+                    b.HasIndex("VendedorId");
 
                     b.ToTable("Ventas");
                 });
@@ -368,12 +622,31 @@ namespace Autos.Migrations
             modelBuilder.Entity("Autos.Models.Auto", b =>
                 {
                     b.HasOne("Autos.Models.Sucursal", "Sucursal")
-                        .WithMany()
+                        .WithMany("Autos")
                         .HasForeignKey("SucursalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Sucursal");
+                });
+
+            modelBuilder.Entity("Autos.Models.ListaEspera", b =>
+                {
+                    b.HasOne("Autos.Models.Auto", "Auto")
+                        .WithMany()
+                        .HasForeignKey("AutoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Autos.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Auto");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Autos.Models.Reserva", b =>
@@ -395,6 +668,77 @@ namespace Autos.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("Autos.Models.SolicitudDescuento", b =>
+                {
+                    b.HasOne("Autos.Models.Auto", "Auto")
+                        .WithMany()
+                        .HasForeignKey("AutoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Autos.Models.Usuario", "Gerente")
+                        .WithMany()
+                        .HasForeignKey("GerenteId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Autos.Models.Usuario", "Vendedor")
+                        .WithMany()
+                        .HasForeignKey("VendedorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Auto");
+
+                    b.Navigation("Gerente");
+
+                    b.Navigation("Vendedor");
+                });
+
+            modelBuilder.Entity("Autos.Models.Sucursal", b =>
+                {
+                    b.HasOne("Autos.Models.Usuario", "Gerente")
+                        .WithMany()
+                        .HasForeignKey("GerenteId");
+
+                    b.Navigation("Gerente");
+                });
+
+            modelBuilder.Entity("Autos.Models.Usuario", b =>
+                {
+                    b.HasOne("Autos.Models.Auto", "AutoInteresado")
+                        .WithMany()
+                        .HasForeignKey("AutoInteresadoId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Autos.Models.Usuario", "VendedorAsignado")
+                        .WithMany()
+                        .HasForeignKey("VendedorAsignadoId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("AutoInteresado");
+
+                    b.Navigation("VendedorAsignado");
+                });
+
+            modelBuilder.Entity("Autos.Models.UsuarioSucursal", b =>
+                {
+                    b.HasOne("Autos.Models.Sucursal", "Sucursal")
+                        .WithMany("VendedoresAsignados")
+                        .HasForeignKey("SucursalId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Autos.Models.Usuario", "Usuario")
+                        .WithMany("SucursalesAsignadas")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Sucursal");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("Autos.Models.Venta", b =>
                 {
                     b.HasOne("Autos.Models.Auto", "Auto")
@@ -403,15 +747,23 @@ namespace Autos.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Autos.Models.Usuario", "Usuario")
+                    b.HasOne("Autos.Models.Usuario", "Cliente")
                         .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Autos.Models.Usuario", "Vendedor")
+                        .WithMany()
+                        .HasForeignKey("VendedorId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Auto");
 
-                    b.Navigation("Usuario");
+                    b.Navigation("Cliente");
+
+                    b.Navigation("Vendedor");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -463,6 +815,18 @@ namespace Autos.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Autos.Models.Sucursal", b =>
+                {
+                    b.Navigation("Autos");
+
+                    b.Navigation("VendedoresAsignados");
+                });
+
+            modelBuilder.Entity("Autos.Models.Usuario", b =>
+                {
+                    b.Navigation("SucursalesAsignadas");
                 });
 #pragma warning restore 612, 618
         }

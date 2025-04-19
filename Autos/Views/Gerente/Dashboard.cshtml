@@ -1,0 +1,307 @@
+@model Autos.Models.GerenteDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard de Gerente";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Dashboard de Sucursal: @Model.Sucursal.Nombre</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- Tarjetas resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-1">Ventas Totales</h6>
+                            <h2 class="mb-0">@Model.TotalVentas</h2>
+                        </div>
+                        <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-primary border-light">
+                    <small>Total de ventas realizadas</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-success shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-1">Ingresos</h6>
+                            <h2 class="mb-0">₡@Model.TotalIngresos.ToString("N0")</h2>
+                        </div>
+                        <i class="fas fa-coins fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-success border-light">
+                    <small>Ingresos totales generados</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-info shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-1">Vendedores</h6>
+                            <h2 class="mb-0">@Model.TotalVendedores</h2>
+                        </div>
+                        <i class="fas fa-users fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-info border-light">
+                    <small>Vendedores activos en la sucursal</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-warning shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-1">Inventario</h6>
+                            <h2 class="mb-0">@Model.TotalInventario</h2>
+                        </div>
+                        <i class="fas fa-car fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-warning border-light">
+                    <small>Vehículos disponibles en la sucursal</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos y tablas -->
+    <div class="row">
+        <!-- Gráfico de ventas por mes -->
+        <div class="col-md-8 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Ventas por Mes</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ventasMensualesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top vendedores -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Top Vendedores</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Vendedor</th>
+                                    <th>Ventas</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.VentasPorVendedor.Any())
+                                {
+                                    @foreach (dynamic item in Model.VentasPorVendedor.Take(5))
+                                    {
+                                        <tr>
+                                            <td>@item.NombreVendedor</td>
+                                            <td>@item.Cantidad</td>
+                                            <td>₡@string.Format("{0:N0}", item.TotalVentas)</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center">No hay datos disponibles</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a asp-action="VentasPorVendedor" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Autos más vendidos -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-car me-2"></i>Autos Más Vendidos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Auto</th>
+                                    <th>Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.AutosMasVendidos.Any())
+                                {
+                                    @foreach (dynamic item in Model.AutosMasVendidos)
+                                    {
+                                        <tr>
+                                            <td>@item.Auto</td>
+                                            <td>@item.Cantidad</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="2" class="text-center">No hay datos disponibles</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimas ventas -->
+        <div class="col-md-8 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Últimas Ventas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Auto</th>
+                                    <th>Vendedor</th>
+                                    <th>Cliente</th>
+                                    <th>Fecha</th>
+                                    <th>Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.UltimasVentas.Any())
+                                {
+                                    @foreach (var venta in Model.UltimasVentas)
+                                    {
+                                        <tr>
+                                            <td>@(venta.Auto != null ? $"{venta.Auto.Marca} {venta.Auto.Modelo}" : "N/A")</td>
+                                            <td>@(venta.Vendedor?.Nombre ?? "N/A")</td>
+                                            <td>@(venta.Cliente?.Nombre ?? "N/A")</td>
+                                            <td>@venta.Fecha.ToString("dd/MM/yyyy")</td>
+                                            <td>₡@(venta.Monto.ToString("N0"))</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay ventas recientes</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Obtener datos para el gráfico
+            const ventasPorMes = @Html.Raw(Json.Serialize(Model.VentasPorMes));
+            
+            if (ventasPorMes && ventasPorMes.length > 0) {
+                const labels = ventasPorMes.map(item => item.periodo);
+                const montos = ventasPorMes.map(item => item.total);
+                const cantidades = ventasPorMes.map(item => item.cantidad);
+                
+                // Crear gráfico de ventas mensuales
+                const ctx = document.getElementById('ventasMensualesChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Monto Total (₡)',
+                                data: montos,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                borderColor: 'rgb(54, 162, 235)',
+                                borderWidth: 1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Cantidad de Ventas',
+                                data: cantidades,
+                                type: 'line',
+                                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                                borderColor: 'rgb(255, 99, 132)',
+                                borderWidth: 2,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                type: 'linear',
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Monto Total (₡)'
+                                }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                type: 'linear',
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Cantidad'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+} 

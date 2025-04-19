@@ -1,0 +1,95 @@
+@model Autos.Models.DescuentoConfig
+
+@{
+    ViewData["Title"] = "Configuración de Ventas";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Configuracion">Configuración</a></li>
+            <li class="breadcrumb-item active">Configuración de Ventas</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="fa-solid fa-gear me-2"></i>Configuración de Ventas</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="ConfigurarDescuento" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-4">
+                            <div class="alert alert-info">
+                                <i class="fa-solid fa-info-circle me-2"></i>
+                                Configure los parámetros relacionados con las ventas y descuentos permitidos en el sistema.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PorcentajeMaximo" class="form-label"></label>
+                            <div class="input-group">
+                                <input asp-for="PorcentajeMaximo" class="form-control" type="number" min="0" max="100" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <span asp-validation-for="PorcentajeMaximo" class="text-danger"></span>
+                            <div class="form-text">
+                                Este valor representa el máximo porcentaje de descuento que los vendedores pueden solicitar.
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa-solid fa-save me-2"></i>Guardar Configuración
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-chart-line me-2"></i>Resumen de Política de Descuentos</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h5>Proceso de Aprobación de Descuentos:</h5>
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item d-flex align-items-center">
+                                <span class="badge bg-primary rounded-pill me-3">1</span>
+                                <span>El vendedor solicita un descuento para una venta específica</span>
+                            </li>
+                            <li class="list-group-item d-flex align-items-center">
+                                <span class="badge bg-primary rounded-pill me-3">2</span>
+                                <span>El gerente recibe la solicitud para aprobación</span>
+                            </li>
+                            <li class="list-group-item d-flex align-items-center">
+                                <span class="badge bg-primary rounded-pill me-3">3</span>
+                                <span>El descuento es aprobado o rechazado</span>
+                            </li>
+                            <li class="list-group-item d-flex align-items-center">
+                                <span class="badge bg-primary rounded-pill me-3">4</span>
+                                <span>Se procede con la venta aplicando el descuento (si fue aprobado)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                        <strong>Importante:</strong> Los descuentos mayores al porcentaje configurado no serán permitidos en el sistema.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

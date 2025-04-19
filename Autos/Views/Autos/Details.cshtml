@@ -1,54 +1,102 @@
 ﻿@model Autos.Models.Auto
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = $"Detalles del {Model.Marca} {Model.Modelo}";
 }
 
-<h1>Details</h1>
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Autos" asp-action="Index">Catálogo</a></li>
+            <li class="breadcrumb-item active">Detalles</li>
+        </ol>
+    </nav>
 
-<div>
-    <h4>Auto</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Marca)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Marca)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Modelo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Modelo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Anio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Anio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Precio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Precio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Disponibilidad)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Disponibilidad)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Sucursal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Sucursal.Direccion)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-car-side me-2"></i>
+                @Model.Marca @Model.Modelo (@Model.Anio)
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <h5 class="text-muted mb-2">Información del Vehículo</h5>
+                        <div class="card">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span><i class="fa-solid fa-tag me-2"></i>Marca:</span>
+                                    <strong>@Model.Marca</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span><i class="fa-solid fa-car me-2"></i>Modelo:</span>
+                                    <strong>@Model.Modelo</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span><i class="fa-solid fa-calendar me-2"></i>Año:</span>
+                                    <strong>@Model.Anio</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span><i class="fa-solid fa-money-bill-wave me-2"></i>Precio:</span>
+                                    <strong class="text-success">₡@Model.Precio.ToString("N0")</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span><i class="fa-solid fa-check-circle me-2"></i>Disponibilidad:</span>
+                                    @if (Model.Disponibilidad)
+                                    {
+                                        <span class="badge bg-success p-2">Disponible</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger p-2">No Disponible</span>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <h5 class="text-muted mb-2">Ubicación</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="mb-2">
+                                    <i class="fa-solid fa-location-dot me-2"></i>
+                                    <strong>Sucursal:</strong> @Model.Sucursal?.Direccion
+                                </p>
+                                <p class="mb-0">
+                                    <i class="fa-solid fa-phone me-2"></i>
+                                    <strong>Contacto:</strong> (123) 456-7890
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Volver al Catálogo
+                </a>
+                <div>
+                    @if (User.IsInRole("Administrador") || User.IsInRole("Vendedor"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
+                            <i class="fa-solid fa-pen me-1"></i>Editar
+                        </a>
+                    }
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <button type="button" class="btn btn-primary">
+                            <i class="fa-solid fa-calendar-check me-1"></i>Reservar
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

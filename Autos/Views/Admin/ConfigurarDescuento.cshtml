@@ -4,28 +4,58 @@
     ViewData["Title"] = "Configurar Descuento";
 }
 
-<h2 class="text-center">Configurar Descuento Máximo</h2>
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item active">Configurar Descuento</li>
+        </ol>
+    </nav>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-
-<form asp-action="ConfigurarDescuento" method="post">
-    <div class="form-group">
-        <label asp-for="PorcentajeMaximo" class="form-label"></label>
-        <input asp-for="PorcentajeMaximo" class="form-control" min="0" max="100" step="0.01" />
-        <span asp-validation-for="PorcentajeMaximo" class="text-danger"></span>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-percent me-2"></i>Configurar Descuento Máximo
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fa-solid fa-info-circle me-2"></i>
+                Establezca el porcentaje máximo de descuento que los vendedores pueden aplicar sin autorización.
+            </div>
+            
+            <form asp-action="ConfigurarDescuento" method="post" id="descuentoForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="PorcentajeMaximo" class="form-label">Porcentaje Máximo de Descuento (%)</label>
+                            <div class="input-group">
+                                <input asp-for="PorcentajeMaximo" class="form-control" min="0" max="100" step="0.01" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <div class="form-text">Valores entre 0% y 100%</div>
+                            <span asp-validation-for="PorcentajeMaximo" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="d-flex justify-content-between">
+                <a asp-action="Dashboard" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Volver al Panel
+                </a>
+                <button type="submit" form="descuentoForm" class="btn btn-success">
+                    <i class="fa-solid fa-save me-1"></i>Guardar Configuración
+                </button>
+            </div>
+        </div>
     </div>
-
-    <button type="submit" class="btn btn-primary mt-3">Guardar Descuento</button>
-    <a asp-action="Dashboard" class="btn btn-secondary mt-3 ms-2">Volver</a>
-</form>
+</div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

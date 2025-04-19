@@ -1,8 +1,51 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Concesionaria de Autos";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Hola</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container">
+    <!-- Banner principal -->
+    <div class="p-4 p-md-5 mb-4 text-white rounded bg-dark">
+        <div class="row">
+            <div class="col-md-8 px-0">
+                <h1 class="display-4">Bienvenido a nuestra Concesionaria</h1>
+                <p class="lead my-3">Encuentra el auto de tus sueños con las mejores condiciones del mercado.</p>
+                <p class="lead mb-0">
+                    <a asp-controller="Autos" asp-action="Index" class="btn btn-primary fw-bold">
+                        <i class="fa-solid fa-car-side me-1"></i>Ver Catálogo
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secciones destacadas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-car fa-3x mb-3 text-primary"></i>
+                    <h4>Amplio Catálogo</h4>
+                    <p>Gran variedad de marcas y modelos para elegir según tus necesidades.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-money-bill-wave fa-3x mb-3 text-success"></i>
+                    <h4>Financiamiento</h4>
+                    <p>Ofrecemos planes de financiamiento adaptados a tu presupuesto.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-headset fa-3x mb-3 text-info"></i>
+                    <h4>Soporte 24/7</h4>
+                    <p>Nuestro equipo está siempre disponible para ayudarte en lo que necesites.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

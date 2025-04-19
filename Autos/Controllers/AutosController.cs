@@ -20,10 +20,65 @@ namespace Autos.Controllers
         }
 
         // GET: Autos
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string marca, string modelo, int? anioMin, int? anioMax, decimal? precioMin, decimal? precioMax, string color, string categoria, int? sucursalId, bool mostrarNoDisponibles = false)
         {
-            var applicationDbContext = _context.Autos.Include(a => a.Sucursal);
-            return View(await applicationDbContext.ToListAsync());
+            // Consulta base
+            var autos = _context.Autos
+                .Include(a => a.Sucursal)
+                .AsQueryable();
+
+            // Por defecto, mostrar solo autos disponibles a menos que se indique lo contrario
+            if (!mostrarNoDisponibles)
+            {
+                autos = autos.Where(a => a.Disponibilidad && a.EstadoReserva == "Disponible");
+            }
+
+            if (!string.IsNullOrEmpty(marca))
+            {
+                autos = autos.Where(a => a.Marca.Contains(marca));
+            }
+
+            if (!string.IsNullOrEmpty(modelo))
+            {
+                autos = autos.Where(a => a.Modelo.Contains(modelo));
+            }
+
+            if (anioMin.HasValue)
+            {
+                autos = autos.Where(a => a.Anio >= anioMin.Value);
+            }
+
+            if (anioMax.HasValue)
+            {
+                autos = autos.Where(a => a.Anio <= anioMax.Value);
+            }
+
+            if (precioMin.HasValue)
+            {
+                autos = autos.Where(a => a.Precio >= precioMin.Value);
+            }
+
+            if (precioMax.HasValue)
+            {
+                autos = autos.Where(a => a.Precio <= precioMax.Value);
+            }
+
+            if (!string.IsNullOrEmpty(color))
+            {
+                autos = autos.Where(a => a.Color.Contains(color));
+            }
+
+            if (!string.IsNullOrEmpty(categoria))
+            {
+                autos = autos.Where(a => a.Categoria.Contains(categoria));
+            }
+
+            if (sucursalId.HasValue)
+            {
+                autos = autos.Where(a => a.SucursalId == sucursalId.Value);
+            }
+
+            return View(await autos.ToListAsync());
         }
 
         // GET: Autos/Details/5

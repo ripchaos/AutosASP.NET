@@ -1,65 +1,73 @@
 ﻿@model IEnumerable<Autos.Models.Auto>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Catálogo de Autos";
 }
 
-<h1>Index</h1>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fa-solid fa-car me-2"></i>Catálogo de Autos</h1>
+        @if (User.IsInRole("Administrador") || User.IsInRole("Vendedor"))
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fa-solid fa-plus me-1"></i>Nuevo Auto
+            </a>
+        }
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Marca)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Modelo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Anio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Precio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Disponibilidad)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Sucursal)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Marca)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Modelo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Anio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Precio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Disponibilidad)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Sucursal.Direccion)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Año</th>
+                    <th>Precio</th>
+                    <th>Disponible</th>
+                    <th>Sucursal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model) {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.Marca)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Modelo)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Anio)</td>
+                        <td>₡@item.Precio.ToString("N0")</td>
+                        <td>
+                            @if(item.Disponibilidad) {
+                                <span class="badge bg-success">Disponible</span>
+                            } else {
+                                <span class="badge bg-danger">No Disponible</span>
+                            }
+                        </td>
+                        <td>@(item.Sucursal?.Direccion ?? "Sin sucursal")</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Detalles">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                @if (User.IsInRole("Administrador") || User.IsInRole("Vendedor"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Editar">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Eliminar">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                }
+                                @if (User.IsInRole("Vendedor") && item.Disponibilidad)
+                                {
+                                    <a asp-controller="Ventas" asp-action="SolicitarDescuento" asp-route-autoId="@item.Id" class="btn btn-sm btn-primary" title="Solicitar descuento">
+                                        <i class="fa-solid fa-percent"></i>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

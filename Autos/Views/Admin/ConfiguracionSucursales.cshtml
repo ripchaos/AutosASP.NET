@@ -1,0 +1,108 @@
+@model IEnumerable<Autos.Models.Sucursal>
+
+@{
+    ViewData["Title"] = "Configuración de Sucursales";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Configuracion">Configuración</a></li>
+            <li class="breadcrumb-item active">Sucursales</li>
+        </ol>
+    </nav>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fa-solid fa-building me-2"></i>Configuración de Sucursales</h1>
+        <a asp-action="CrearSucursal" class="btn btn-primary">
+            <i class="fa-solid fa-plus me-2"></i>Nueva Sucursal
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fa-solid fa-info-circle me-2"></i>
+            No hay sucursales registradas. Cree una nueva sucursal utilizando el botón "Nueva Sucursal".
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var sucursal in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm @(sucursal.Activa ? "border-success" : "border-danger")">
+                        <div class="card-header @(sucursal.Activa ? "bg-success" : "bg-danger") text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">@sucursal.Nombre</h5>
+                                <span class="badge bg-light text-dark">
+                                    @(sucursal.Activa ? "Activa" : "Inactiva")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                <i class="fa-solid fa-location-dot me-2"></i>
+                                <strong>Dirección:</strong> @sucursal.Direccion
+                            </p>
+                            
+                            @if (!string.IsNullOrEmpty(sucursal.Ubicacion))
+                            {
+                                <p>
+                                    <i class="fa-solid fa-map-marker me-2"></i>
+                                    <strong>Ubicación:</strong> @sucursal.Ubicacion
+                                </p>
+                            }
+                            
+                            <p>
+                                <i class="fa-solid fa-user-tie me-2"></i>
+                                <strong>Gerente:</strong> @(sucursal.Gerente != null ? sucursal.Gerente.Nombre : "Sin asignar")
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="EditarSucursal" asp-route-id="@sucursal.Id" class="btn btn-warning btn-sm">
+                                    <i class="fa-solid fa-edit me-1"></i>Editar
+                                </a>
+                                <a asp-action="AdministrarVendedoresSucursal" asp-route-sucursalId="@sucursal.Id" class="btn btn-info btn-sm">
+                                    <i class="fa-solid fa-users me-1"></i>Vendedores
+                                </a>
+                                <a asp-action="EliminarSucursal" asp-route-id="@sucursal.Id" class="btn btn-danger btn-sm">
+                                    <i class="fa-solid fa-trash me-1"></i>Eliminar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Si hay alertas, ocultarlas automáticamente después de 5 segundos
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+    </script>
+} 

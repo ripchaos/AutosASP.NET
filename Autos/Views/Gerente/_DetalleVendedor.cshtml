@@ -1,0 +1,105 @@
+@model Autos.Models.VendedorDetalleViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Detalles del Vendedor</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">Información Personal</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nombre:</strong> @Model.Vendedor.Nombre</p>
+                    <p><strong>Email:</strong> @Model.Vendedor.Email</p>
+                    <p><strong>Identificación:</strong> @Model.Vendedor.Identificacion</p>
+                    <p><strong>Fecha de Asignación:</strong> @Model.FechaAsignacion.ToString("dd/MM/yyyy")</p>
+                    <p>
+                        <strong>Estatus:</strong>
+                        @if (Model.Activo)
+                        {
+                            <span class="badge bg-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactivo</span>
+                        }
+                    </p>
+                    <p>
+                        <strong>¿Es Principal?</strong>
+                        @if (Model.EsPrincipal)
+                        {
+                            <span class="badge bg-primary">Principal</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-light text-dark">No</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">Estadísticas de Ventas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="text-center">
+                            <h2>@Model.TotalVentas</h2>
+                            <p class="text-muted mb-0">Total Ventas</p>
+                        </div>
+                        <div class="text-center">
+                            <h2>₡@Model.MontoTotal.ToString("N0")</h2>
+                            <p class="text-muted mb-0">Monto Total</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.VentasRecientes.Any())
+    {
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">Ventas Recientes</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Auto</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var venta in Model.VentasRecientes)
+                            {
+                                <tr>
+                                    <td>@venta.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>@(venta.Auto != null ? $"{venta.Auto.Marca} {venta.Auto.Modelo}" : "N/A")</td>
+                                    <td>₡@venta.MontoFinal.ToString("N0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p class="mb-0">Este vendedor aún no ha registrado ventas.</p>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+</div> 

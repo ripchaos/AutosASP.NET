@@ -1,0 +1,70 @@
+@model Autos.Models.Sucursal
+
+@{
+    ViewData["Title"] = "Eliminar Sucursal";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Panel de Administración</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Configuracion">Configuración</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="ConfiguracionSucursales">Sucursales</a></li>
+            <li class="breadcrumb-item active">Eliminar Sucursal</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-trash me-2"></i>Eliminar Sucursal
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger mb-4">
+                <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                <strong>¡Advertencia!</strong> Está a punto de eliminar una sucursal. Esta acción no se puede deshacer.
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Detalles de la Sucursal</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Nombre)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Nombre)</dd>
+                        
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Direccion)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Direccion)</dd>
+                        
+                        @if (!string.IsNullOrEmpty(Model.Ubicacion))
+                        {
+                            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Ubicacion)</dt>
+                            <dd class="col-sm-9">@Html.DisplayFor(model => model.Ubicacion)</dd>
+                        }
+                        
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Gerente)</dt>
+                        <dd class="col-sm-9">@(Model.Gerente != null ? Model.Gerente.Nombre : "Sin asignar")</dd>
+                        
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Activa)</dt>
+                        <dd class="col-sm-9">@(Model.Activa ? "Sí" : "No")</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <form asp-action="EliminarSucursal" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="ConfiguracionSucursales" class="btn btn-secondary">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Volver
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa-solid fa-trash me-2"></i>Confirmar Eliminación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 
