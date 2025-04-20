@@ -130,6 +130,80 @@ namespace Autos.Data.Migrations
                 }
             }
 
+            // Crear recepcionistas para las sucursales
+            var recepcionistas = new List<Usuario>
+            {
+                new Usuario
+                {
+                    UserName = "recepcion.sanjose@autoscr.com",
+                    Email = "recepcion.sanjose@autoscr.com",
+                    Nombre = "María Fernández",
+                    Rol = "Recepcionista",
+                    Identificacion = "115430789",
+                    Direccion = "San José, Costa Rica",
+                    FechaRegistro = DateTime.Now,
+                    EmailConfirmed = true
+                },
+                new Usuario
+                {
+                    UserName = "recepcion.cartago@autoscr.com",
+                    Email = "recepcion.cartago@autoscr.com",
+                    Nombre = "José Campos",
+                    Rol = "Recepcionista",
+                    Identificacion = "215340978",
+                    Direccion = "Cartago, Costa Rica",
+                    FechaRegistro = DateTime.Now,
+                    EmailConfirmed = true
+                },
+                new Usuario
+                {
+                    UserName = "recepcion.heredia@autoscr.com",
+                    Email = "recepcion.heredia@autoscr.com",
+                    Nombre = "Laura Vargas",
+                    Rol = "Recepcionista",
+                    Identificacion = "315670234",
+                    Direccion = "Heredia, Costa Rica",
+                    FechaRegistro = DateTime.Now,
+                    EmailConfirmed = true
+                },
+                new Usuario
+                {
+                    UserName = "recepcion.liberia@autoscr.com",
+                    Email = "recepcion.liberia@autoscr.com",
+                    Nombre = "Gabriel Solano",
+                    Rol = "Recepcionista",
+                    Identificacion = "514320987",
+                    Direccion = "Liberia, Guanacaste, Costa Rica",
+                    FechaRegistro = DateTime.Now,
+                    EmailConfirmed = true
+                },
+                new Usuario
+                {
+                    UserName = "recepcion.limon@autoscr.com",
+                    Email = "recepcion.limon@autoscr.com",
+                    Nombre = "Carla Mejías",
+                    Rol = "Recepcionista",
+                    Identificacion = "712150678",
+                    Direccion = "Limón, Costa Rica",
+                    FechaRegistro = DateTime.Now,
+                    EmailConfirmed = true
+                }
+            };
+
+            // Contraseña para todos los recepcionistas
+            string passwordRecepcionista = "Recepcion123*";
+            var recepcionistaIds = new List<string>();
+
+            foreach (var recepcionista in recepcionistas)
+            {
+                var result = await userManager.CreateAsync(recepcionista, passwordRecepcionista);
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(recepcionista, "Recepcionista");
+                    recepcionistaIds.Add(recepcionista.Id);
+                }
+            }
+
             // Crear algunos vendedores de prueba
             var vendedores = new List<Usuario>();
             for (int i = 1; i <= 5; i++)
@@ -210,6 +284,56 @@ namespace Autos.Data.Migrations
             // Asignar vendedores a sucursales
             var todasSucursales = await context.Sucursales.ToListAsync();
             var todosVendedores = await userManager.GetUsersInRoleAsync("Vendedor");
+            var todosRecepcionistas = await userManager.GetUsersInRoleAsync("Recepcionista");
+            
+            // Asignar recepcionistas a cada sucursal
+            for (int i = 0; i < Math.Min(todasSucursales.Count, todosRecepcionistas.Count); i++)
+            {
+                var recepcionistaActual = todosRecepcionistas.ElementAt(i);
+                
+                // Encontrar la sucursal correcta basada en el email del recepcionista
+                Sucursal sucursalCorrecta;
+                
+                if (recepcionistaActual.Email?.Contains("sanjose") == true)
+                {
+                    sucursalCorrecta = todasSucursales.FirstOrDefault(s => s.Nombre.Contains("San José")) 
+                        ?? todasSucursales.ElementAt(0);
+                }
+                else if (recepcionistaActual.Email?.Contains("cartago") == true)
+                {
+                    sucursalCorrecta = todasSucursales.FirstOrDefault(s => s.Nombre.Contains("Cartago")) 
+                        ?? todasSucursales.ElementAt(1);
+                }
+                else if (recepcionistaActual.Email?.Contains("heredia") == true)
+                {
+                    sucursalCorrecta = todasSucursales.FirstOrDefault(s => s.Nombre.Contains("Heredia")) 
+                        ?? todasSucursales.ElementAt(2);
+                }
+                else if (recepcionistaActual.Email?.Contains("liberia") == true)
+                {
+                    sucursalCorrecta = todasSucursales.FirstOrDefault(s => s.Nombre.Contains("Guanacaste")) 
+                        ?? todasSucursales.ElementAt(3);
+                }
+                else if (recepcionistaActual.Email?.Contains("limon") == true)
+                {
+                    sucursalCorrecta = todasSucursales.FirstOrDefault(s => s.Nombre.Contains("Limón")) 
+                        ?? todasSucursales.ElementAt(4);
+                }
+                else
+                {
+                    // Si no hay coincidencia, usar la sucursal según el índice
+                    sucursalCorrecta = todasSucursales.ElementAt(i % todasSucursales.Count);
+                }
+                
+                context.UsuariosSucursales.Add(new UsuarioSucursal
+                {
+                    UsuarioId = recepcionistaActual.Id,
+                    SucursalId = sucursalCorrecta.Id,
+                    FechaAsignacion = DateTime.Now,
+                    Activo = true,
+                    EsPrincipal = true
+                });
+            }
             
             // Asignar el primer vendedor a la primera sucursal
             if (todosVendedores.Count > 0 && todasSucursales.Count > 0)

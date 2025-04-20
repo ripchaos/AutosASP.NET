@@ -33,7 +33,14 @@
                                 {
                                     foreach (var auto in ViewBag.Autos)
                                     {
-                                        <option value="@auto.Id">@auto.Nombre</option>
+                                        if (ViewBag.AutoSeleccionado != null && ViewBag.AutoSeleccionado == auto.Id)
+                                        {
+                                            <option value="@auto.Id" selected>@auto.Nombre</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@auto.Id">@auto.Nombre</option>
+                                        }
                                     }
                                 }
                             </select>
@@ -41,39 +48,46 @@
 
                         <div class="mb-3">
                             <label class="form-label">Vendedor</label>
-                            <select name="VendedorId" class="form-select" required>
-                                <option value="">-- Seleccione un Vendedor --</option>
-                                @if (ViewBag.Vendedores != null)
-                                {
-                                    foreach (var vendedor in ViewBag.Vendedores)
-                                    {
-                                        <option value="@vendedor.Id">@vendedor.Nombre</option>
-                                    }
-                                }
-                            </select>
+                            <div class="form-control bg-light">@ViewBag.VendedorActual.Nombre</div>
+                            <input type="hidden" name="VendedorId" value="@ViewBag.VendedorActual.Id" />
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">Cliente</label>
-                            <select name="ClienteId" class="form-select" required>
-                                <option value="">-- Seleccione un Cliente --</option>
-                                @if (ViewBag.Clientes != null)
-                                {
-                                    foreach (var cliente in ViewBag.Clientes)
+                            @if (ViewBag.ClienteSeleccionado != null && ViewBag.ClienteSeleccionadoNombre != null)
+                            {
+                                <div class="form-control bg-light">@ViewBag.ClienteSeleccionadoNombre</div>
+                                <input type="hidden" name="ClienteId" value="@ViewBag.ClienteSeleccionado" />
+                            }
+                            else
+                            {
+                                <select name="ClienteId" class="form-select" required>
+                                    <option value="">-- Seleccione un Cliente --</option>
+                                    @if (ViewBag.Clientes != null)
                                     {
-                                        <option value="@cliente.Id">@cliente.Nombre</option>
+                                        foreach (var cliente in ViewBag.Clientes)
+                                        {
+                                            if (ViewBag.ClienteSeleccionado != null && ViewBag.ClienteSeleccionado == cliente.Id)
+                                            {
+                                                <option value="@cliente.Id" selected>@cliente.Nombre</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@cliente.Id">@cliente.Nombre</option>
+                                            }
+                                        }
                                     }
-                                }
-                            </select>
+                                </select>
+                            }
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Monto" class="form-label">Monto de la Venta</label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input asp-for="Monto" class="form-control" placeholder="0.00" required />
+                                <span class="input-group-text">₡</span>
+                                <input asp-for="Monto" class="form-control" placeholder="0.00" required value="@Model.Monto.ToString("N0")" onchange="calcularMontoFinal()" />
                             </div>
                             <span asp-validation-for="Monto" class="text-danger"></span>
                         </div>
@@ -85,7 +99,7 @@
                         <div class="mb-3">
                             <label asp-for="PorcentajeDescuento" class="form-label">Porcentaje de Descuento</label>
                             <div class="input-group">
-                                <input asp-for="PorcentajeDescuento" class="form-control" value="0" min="0" max="100" type="number" step="0.01" />
+                                <input asp-for="PorcentajeDescuento" id="porcentajeDescuento" class="form-control" value="0" min="0" max="100" type="number" step="0.01" onchange="calcularMontoFinal()" />
                                 <span class="input-group-text">%</span>
                             </div>
                             <span asp-validation-for="PorcentajeDescuento" class="text-danger"></span>
@@ -98,6 +112,23 @@
                             <label asp-for="Fecha" class="form-label">Fecha de Venta</label>
                             <input asp-for="Fecha" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
                             <span asp-validation-for="Fecha" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5 class="mb-0">Monto Final (después de descuento):</h5>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <h5 class="mb-0" id="montoFinal">₡0</h5>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -118,4 +149,27 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Asegurarse que el documento esté cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Llamar a la función inicialmente para mostrar el valor correcto
+            calcularMontoFinal();
+            
+            // Añadir evento al campo de monto para actualizar el cálculo
+            document.getElementById('Monto').addEventListener('input', calcularMontoFinal);
+        });
+        
+        function calcularMontoFinal() {
+            const monto = parseFloat(document.getElementById('Monto').value.replace(/,/g, '')) || 0;
+            const porcentaje = parseFloat(document.getElementById('porcentajeDescuento').value) || 0;
+            
+            // Calcular el monto final (monto - descuento)
+            const descuento = monto * (porcentaje / 100);
+            const montoFinal = monto - descuento;
+            
+            // Mostrar el monto final formateado
+            document.getElementById('montoFinal').innerText = '₡' + montoFinal.toLocaleString('es-CR');
+        }
+    </script>
 } 

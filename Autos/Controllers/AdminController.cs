@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Autos.Services;
+using Autos.Models.ViewModels;
 
 namespace Autos.Controllers
 {
@@ -77,16 +78,16 @@ namespace Autos.Controllers
                     .Where(v => v.Fecha >= fechaInicioMes)
                     .CountAsync();
                 
-                var ingresosTotales = await _context.Ventas.AnyAsync() 
-                    ? await _context.Ventas.SumAsync(v => v.MontoFinal)
+                // Cargar las ventas en memoria y calcular los totales
+                var todasLasVentas = await _context.Ventas.ToListAsync();
+                var ventasDeEsteMes = todasLasVentas.Where(v => v.Fecha >= fechaInicioMes).ToList();
+                
+                var ingresosTotales = todasLasVentas.Any() 
+                    ? todasLasVentas.Sum(v => v.MontoFinal)
                     : 0;
                 
-                var ingresosMensuales = await _context.Ventas
-                    .Where(v => v.Fecha >= fechaInicioMes)
-                    .AnyAsync()
-                    ? await _context.Ventas
-                        .Where(v => v.Fecha >= fechaInicioMes)
-                        .SumAsync(v => v.MontoFinal)
+                var ingresosMensuales = ventasDeEsteMes.Any()
+                    ? ventasDeEsteMes.Sum(v => v.MontoFinal)
                     : 0;
                 
                 var autosDisponibles = await _context.Autos
@@ -233,6 +234,200 @@ namespace Autos.Controllers
         {
             var usuarios = _userManager.Users.ToList();
             return View(usuarios);
+        }
+
+        // 🔹 Listar Clientes
+        public async Task<IActionResult> Clientes()
+        {
+            var clientes = await _userManager.Users
+                .Where(u => u.Rol == "Cliente")
+                .OrderBy(u => u.Nombre)
+                .ToListAsync();
+
+            // Agregar información del vendedor para cada cliente
+            var clientesViewModel = new List<ClienteViewModel>();
+            
+            foreach (var cliente in clientes)
+            {
+                var vendedor = cliente.VendedorAsignadoId != null 
+                    ? await _userManager.FindByIdAsync(cliente.VendedorAsignadoId) 
+                    : null;
+                
+                clientesViewModel.Add(new ClienteViewModel
+                {
+                    Cliente = cliente,
+                    VendedorNombre = vendedor?.Nombre ?? "No asignado",
+                    ReservasActivas = await _context.Reservas
+                        .CountAsync(r => r.UsuarioId == cliente.Id && r.Estado == "Activa"),
+                    ComprasRealizadas = await _context.Ventas
+                        .CountAsync(v => v.ClienteId == cliente.Id)
+                });
+            }
+            
+            return View(clientesViewModel);
+        }
+
+        // 🔹 Ver Detalle de Cliente
+        public async Task<IActionResult> DetalleCliente(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["Error"] = "ID de cliente no válido";
+                return RedirectToAction("Clientes");
+            }
+
+            var cliente = await _userManager.FindByIdAsync(id);
+            if (cliente == null || cliente.Rol != "Cliente")
+            {
+                TempData["Error"] = "Cliente no encontrado";
+                return RedirectToAction("Clientes");
+            }
+
+            // Obtener el vendedor asignado
+            var vendedor = cliente.VendedorAsignadoId != null 
+                ? await _userManager.FindByIdAsync(cliente.VendedorAsignadoId) 
+                : null;
+
+            // Obtener reservas del cliente
+            var reservas = await _context.Reservas
+                .Include(r => r.Auto)
+                .Where(r => r.UsuarioId == cliente.Id)
+                .OrderByDescending(r => r.FechaReserva)
+                .ToListAsync();
+
+            // Obtener compras del cliente
+            var compras = await _context.Ventas
+                .Include(v => v.Auto)
+                .Include(v => v.Vendedor)
+                .Where(v => v.ClienteId == cliente.Id)
+                .OrderByDescending(v => v.Fecha)
+                .ToListAsync();
+
+            var viewModel = new DetalleClienteViewModel
+            {
+                Cliente = cliente,
+                VendedorAsignado = vendedor,
+                Reservas = reservas,
+                Compras = compras
+            };
+
+            return View(viewModel);
+        }
+
+        // 🔹 Vista para Reasignar Vendedor a Cliente
+        public async Task<IActionResult> ReasignarVendedor(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["Error"] = "ID de cliente no válido";
+                return RedirectToAction("Clientes");
+            }
+
+            var cliente = await _userManager.FindByIdAsync(id);
+            if (cliente == null || cliente.Rol != "Cliente")
+            {
+                TempData["Error"] = "Cliente no encontrado";
+                return RedirectToAction("Clientes");
+            }
+
+            // Obtener el vendedor actual
+            var vendedorActual = cliente.VendedorAsignadoId != null 
+                ? await _userManager.FindByIdAsync(cliente.VendedorAsignadoId) 
+                : null;
+
+            // Obtener todos los vendedores para la selección
+            var vendedores = await _userManager.GetUsersInRoleAsync("Vendedor");
+            var vendedoresSelectList = vendedores
+                .OrderBy(v => v.Nombre)
+                .Select(v => new SelectListItem
+                {
+                    Value = v.Id,
+                    Text = v.Nombre,
+                    Selected = v.Id == cliente.VendedorAsignadoId
+                })
+                .ToList();
+
+            var viewModel = new ReasignarVendedorViewModel
+            {
+                ClienteId = cliente.Id,
+                NombreCliente = cliente.Nombre,
+                EmailCliente = cliente.Email,
+                VendedorActualId = cliente.VendedorAsignadoId,
+                VendedorActualNombre = vendedorActual?.Nombre ?? "No asignado",
+                Vendedores = vendedoresSelectList
+            };
+
+            return View(viewModel);
+        }
+
+        // 🔹 POST: Reasignar Vendedor a Cliente
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReasignarVendedor(ReasignarVendedorViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Recargar la lista de vendedores en caso de error
+                var vendedores = await _userManager.GetUsersInRoleAsync("Vendedor");
+                model.Vendedores = vendedores
+                    .OrderBy(v => v.Nombre)
+                    .Select(v => new SelectListItem
+                    {
+                        Value = v.Id,
+                        Text = v.Nombre,
+                        Selected = v.Id == model.NuevoVendedorId
+                    })
+                    .ToList();
+
+                return View(model);
+            }
+
+            var cliente = await _userManager.FindByIdAsync(model.ClienteId);
+            if (cliente == null || cliente.Rol != "Cliente")
+            {
+                TempData["Error"] = "Cliente no encontrado";
+                return RedirectToAction("Clientes");
+            }
+
+            // Verificar si el vendedor existe
+            if (!string.IsNullOrEmpty(model.NuevoVendedorId))
+            {
+                var vendedor = await _userManager.FindByIdAsync(model.NuevoVendedorId);
+                if (vendedor == null || vendedor.Rol != "Vendedor")
+                {
+                    ModelState.AddModelError("NuevoVendedorId", "Vendedor no válido");
+                    
+                    // Recargar la lista de vendedores
+                    var vendedores = await _userManager.GetUsersInRoleAsync("Vendedor");
+                    model.Vendedores = vendedores
+                        .OrderBy(v => v.Nombre)
+                        .Select(v => new SelectListItem
+                        {
+                            Value = v.Id,
+                            Text = v.Nombre,
+                            Selected = v.Id == model.NuevoVendedorId
+                        })
+                        .ToList();
+
+                    return View(model);
+                }
+
+                // Actualizar el vendedor asignado
+                cliente.VendedorAsignadoId = model.NuevoVendedorId;
+                await _userManager.UpdateAsync(cliente);
+
+                TempData["Success"] = $"Cliente {cliente.Nombre} reasignado correctamente al vendedor {vendedor.Nombre}";
+            }
+            else
+            {
+                // Si se seleccionó "Sin vendedor"
+                cliente.VendedorAsignadoId = null;
+                await _userManager.UpdateAsync(cliente);
+
+                TempData["Success"] = $"Cliente {cliente.Nombre} ahora no tiene vendedor asignado";
+            }
+
+            return RedirectToAction("Clientes");
         }
 
         // 🔹 Asignar Roles a Usuarios

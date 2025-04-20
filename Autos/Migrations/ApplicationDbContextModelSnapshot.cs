@@ -43,6 +43,11 @@ namespace Autos.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<string>("Combustible")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<bool>("Disponibilidad")
                         .HasColumnType("bit");
 
@@ -53,6 +58,9 @@ namespace Autos.Migrations
 
                     b.Property<DateTime?>("FechaFinReserva")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Kilometraje")
+                        .HasColumnType("int");
 
                     b.Property<string>("Marca")
                         .IsRequired()
@@ -77,6 +85,11 @@ namespace Autos.Migrations
 
                     b.Property<bool>("TieneDescuento")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Transmision")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -210,6 +223,18 @@ namespace Autos.Migrations
                     b.Property<int>("AutoId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Comentarios")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("FechaExpiracion")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("FechaReserva")
                         .HasColumnType("datetime2");
 
@@ -217,11 +242,16 @@ namespace Autos.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("VendedorId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AutoId");
 
                     b.HasIndex("UsuarioId");
+
+                    b.HasIndex("VendedorId");
 
                     b.ToTable("Reservas");
                 });
@@ -663,9 +693,15 @@ namespace Autos.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Autos.Models.Usuario", "Vendedor")
+                        .WithMany()
+                        .HasForeignKey("VendedorId");
+
                     b.Navigation("Auto");
 
                     b.Navigation("Usuario");
+
+                    b.Navigation("Vendedor");
                 });
 
             modelBuilder.Entity("Autos.Models.SolicitudDescuento", b =>

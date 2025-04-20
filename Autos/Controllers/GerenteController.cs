@@ -300,7 +300,7 @@ namespace Autos.Controllers
         // POST: Gerente/AsignarVendedor - Ya no es necesario, pero mantenemos el método para evitar errores
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AsignarVendedor(string vendedorId, int sucursalId, bool esPrincipal = false)
+        public IActionResult AsignarVendedor(string vendedorId, int sucursalId, bool esPrincipal = false)
         {
             // Los gerentes no deberían poder acceder a esta funcionalidad
             TempData["Error"] = "No tiene permisos para asignar vendedores. Esta acción solo puede ser realizada por un administrador.";

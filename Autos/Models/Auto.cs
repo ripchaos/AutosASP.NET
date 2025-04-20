@@ -26,6 +26,18 @@ namespace Autos.Models
         [Display(Name = "Precio en Colones")]
         public decimal Precio { get; set; }
 
+        [Range(0, 500000)]
+        [Display(Name = "Kilometraje")]
+        public int Kilometraje { get; set; } = 0;
+
+        [StringLength(20)]
+        [Display(Name = "Transmisión")]
+        public string Transmision { get; set; } = "Manual";
+
+        [StringLength(20)]
+        [Display(Name = "Combustible")]
+        public string Combustible { get; set; } = "Gasolina";
+
         public bool Disponibilidad { get; set; } = true;
 
         public int SucursalId { get; set; }

@@ -1,0 +1,137 @@
+@using Autos.Models.ViewModels
+@model ReservarAutoDesdeVendedorViewModel
+
+@{
+    ViewData["Title"] = "Reservar Auto";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-calendar-alt me-2"></i>Reservar Auto para Cliente
+            </h6>
+            <div>
+                <a asp-action="DetalleCliente" asp-route-id="@Model.ClienteId" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Cliente
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Está reservando un auto para: <strong>@Model.NombreCliente</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos del Auto -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">Información del Auto</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted">Marca:</label>
+                                <p class="form-control-static">@Model.Auto.Marca</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted">Modelo:</label>
+                                <p class="form-control-static">@Model.Auto.Modelo</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted">Año:</label>
+                                <p class="form-control-static">@Model.Auto.Anio</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted">Precio:</label>
+                                <p class="form-control-static">₡@Model.Auto.Precio.ToString("N0")</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted">Color:</label>
+                                <p class="form-control-static">@Model.Auto.Color</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted">Características:</label>
+                                <p class="form-control-static">@Model.Auto.Categoria</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Reserva -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">Datos de la Reserva</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="ReservarAuto" method="post">
+                        <!-- Campos ocultos críticos -->
+                        <input type="hidden" name="ClienteId" value="@Model.ClienteId" />
+                        <input type="hidden" name="NombreCliente" value="@Model.NombreCliente" />
+                        <input type="hidden" name="VendedorId" value="@Model.VendedorId" />
+                        <input type="hidden" name="Auto.Id" value="@Model.Auto.Id" />
+                        
+                        <!-- Propiedades del auto -->
+                        <input type="hidden" name="Auto.Marca" value="@Model.Auto.Marca" />
+                        <input type="hidden" name="Auto.Modelo" value="@Model.Auto.Modelo" />
+                        <input type="hidden" name="Auto.Anio" value="@Model.Auto.Anio" />
+                        <input type="hidden" name="Auto.Color" value="@Model.Auto.Color" />
+                        <input type="hidden" name="Auto.Precio" value="@Model.Auto.Precio" />
+                        <input type="hidden" name="Auto.Disponibilidad" value="@Model.Auto.Disponibilidad" />
+                        <input type="hidden" name="Auto.EstadoReserva" value="@Model.Auto.EstadoReserva" />
+                        <input type="hidden" name="Auto.SucursalId" value="@Model.Auto.SucursalId" />
+                        <input type="hidden" name="Auto.Categoria" value="@Model.Auto.Categoria" />
+                        <input type="hidden" name="Auto.TieneDescuento" value="@Model.Auto.TieneDescuento" />
+                        <input type="hidden" name="Auto.PorcentajeDescuento" value="@Model.Auto.PorcentajeDescuento" />
+                        <input type="hidden" name="Auto.Kilometraje" value="@Model.Auto.Kilometraje" />
+                        <input type="hidden" name="Auto.Transmision" value="@Model.Auto.Transmision" />
+
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="mb-3">
+                                    <label for="DuracionReserva" class="form-label">Duración de la reserva (días)</label>
+                                    <input type="number" name="DuracionReserva" id="DuracionReserva" class="form-control" value="@Model.DuracionReserva" min="1" max="30" required />
+                                    <div class="invalid-feedback">La duración debe estar entre 1 y 30 días</div>
+                                    <small class="form-text text-muted">Establece por cuántos días estará reservado el auto.</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="Comentarios" class="form-label">Comentarios</label>
+                                    <textarea name="Comentarios" id="Comentarios" class="form-control" rows="3">@Model.Comentarios</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 col-6 mx-auto mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calendar-check me-2"></i>Confirmar Reserva
+                            </button>
+                            <a asp-action="DetalleCliente" asp-route-id="@Model.ClienteId" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

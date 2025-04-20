@@ -57,18 +57,22 @@ namespace Autos.Controllers
         }
 
         // GET: Ventas/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(string? clienteId = null, int? autoId = null)
         {
+            // Obtener el vendedor actual
+            var vendedorActual = await _userManager.GetUserAsync(User);
+            if (vendedorActual == null)
+            {
+                return NotFound("No se pudo identificar al vendedor actual.");
+            }
+
+            // Pasar el ID y nombre del vendedor actual a la vista
+            ViewBag.VendedorActual = new { Id = vendedorActual.Id, Nombre = vendedorActual.Nombre };
+            
             // Cargar autos disponibles para venta
             ViewBag.Autos = _context.Autos
                 .Where(a => a.Disponibilidad)
                 .Select(a => new { Id = a.Id, Nombre = $"{a.Marca} {a.Modelo} ({a.Anio})" })
-                .ToList();
-            
-            // Cargar vendedores
-            ViewBag.Vendedores = _context.Users
-                .Where(u => u.Rol == "Vendedor")
-                .Select(u => new { Id = u.Id, Nombre = u.Nombre })
                 .ToList();
             
             // Cargar clientes
@@ -76,8 +80,41 @@ namespace Autos.Controllers
                 .Where(u => u.Rol == "Cliente")
                 .Select(u => new { Id = u.Id, Nombre = u.Nombre })
                 .ToList();
+
+            // Si se proporcionaron parámetros, crear un modelo de Venta pre-poblado
+            var venta = new Venta
+            {
+                VendedorId = vendedorActual.Id,
+                ClienteId = clienteId ?? string.Empty,
+                Fecha = DateTime.Now
+            };
+
+            if (clienteId != null)
+            {
+                ViewBag.ClienteSeleccionado = clienteId;
+                
+                // Obtener información adicional del cliente
+                var cliente = await _userManager.FindByIdAsync(clienteId);
+                if (cliente != null)
+                {
+                    ViewBag.ClienteSeleccionadoNombre = cliente.Nombre;
+                }
+            }
+
+            if (autoId.HasValue)
+            {
+                venta.AutoId = autoId.Value;
+                ViewBag.AutoSeleccionado = autoId;
+
+                // Obtener el precio del auto para pre-cargar
+                var auto = await _context.Autos.FindAsync(autoId.Value);
+                if (auto != null)
+                {
+                    venta.Monto = auto.Precio;
+                }
+            }
             
-            return View();
+            return View(venta);
         }
 
         // POST: Ventas/Create

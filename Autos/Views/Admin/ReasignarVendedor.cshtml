@@ -1,0 +1,90 @@
+@model Autos.Models.ViewModels.ReasignarVendedorViewModel
+
+@{
+    ViewData["Title"] = "Reasignar Vendedor";
+}
+
+<div class="container">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">
+                    <i class="fa-solid fa-user-tag me-2"></i>Reasignar Vendedor
+                </h2>
+                <a asp-controller="Admin" asp-action="DetalleCliente" asp-route-id="@Model.ClienteId" class="btn btn-light">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Volver al Cliente
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <form asp-action="ReasignarVendedor" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="ClienteId" />
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Información del Cliente</h5>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Nombre:</dt>
+                                    <dd class="col-sm-8">@Model.NombreCliente</dd>
+                                    
+                                    <dt class="col-sm-4">Email:</dt>
+                                    <dd class="col-sm-8">@Model.EmailCliente</dd>
+                                    
+                                    <dt class="col-sm-4">Vendedor Actual:</dt>
+                                    <dd class="col-sm-8">
+                                        @if (Model.VendedorActualId != null)
+                                        {
+                                            <span class="badge bg-primary">@Model.VendedorActualNombre</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">No asignado</span>
+                                        }
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Seleccionar Nuevo Vendedor</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label asp-for="NuevoVendedorId" class="form-label">Vendedor</label>
+                                    <select asp-for="NuevoVendedorId" class="form-select" asp-items="Model.Vendedores">
+                                        <option value="">-- Seleccionar Vendedor --</option>
+                                    </select>
+                                    <span asp-validation-for="NuevoVendedorId" class="text-danger"></span>
+                                    <div class="form-text">
+                                        Seleccione un vendedor para asignar al cliente. Si no selecciona ninguno, el cliente quedará sin vendedor asignado.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a asp-controller="Admin" asp-action="DetalleCliente" asp-route-id="@Model.ClienteId" class="btn btn-secondary">
+                        <i class="fa-solid fa-times me-1"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa-solid fa-save me-1"></i>Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

@@ -1,0 +1,370 @@
+@model Autos.Models.ViewModels.VendedorDashboardViewModel
+@using Autos.Models.Utils
+
+@{
+    ViewData["Title"] = "Dashboard del Vendedor";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Dashboard del Vendedor</h2>
+                        <div>
+                            <span class="badge bg-light text-dark">
+                                <i class="fas fa-user me-1"></i>@Model.Vendedor.Nombre
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["Success"]</div>
+                    }
+
+                    <!-- Tarjetas de resumen -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Solicitudes Pendientes</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalSolicitudesPendientes</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-percent fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light p-2">
+                                    <a asp-action="SolicitudesDescuento" class="text-decoration-none small">
+                                        <i class="fas fa-arrow-right me-1"></i>Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Reservas Activas</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalReservasActivas</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light p-2">
+                                    <a asp-action="Reservas" class="text-decoration-none small">
+                                        <i class="fas fa-arrow-right me-1"></i>Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Ventas Totales</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalVentas</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light p-2">
+                                    <a asp-action="Ventas" class="text-decoration-none small">
+                                        <i class="fas fa-arrow-right me-1"></i>Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Ingreso Total</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                @CurrencyFormatter.FormatCRC(Model.MontoTotalVentas)
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light p-2">
+                                    <a asp-action="Ventas" class="text-decoration-none small">
+                                        <i class="fas fa-arrow-right me-1"></i>Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fila principal con solicitudes y reservas -->
+                    <div class="row">
+                        <!-- Solicitudes de descuento -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-primary text-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0"><i class="fas fa-percent me-2"></i>Solicitudes de Descuento Recientes</h5>
+                                        <a asp-action="SolicitudesDescuento" class="btn btn-sm btn-light">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    @if (!Model.SolicitudesDescuento.Any())
+                                    {
+                                        <div class="alert alert-info">
+                                            <p class="mb-0">No hay solicitudes de descuento recientes.</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Auto</th>
+                                                        <th>Fecha</th>
+                                                        <th>Descuento</th>
+                                                        <th>Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var solicitud in Model.SolicitudesDescuento)
+                                                    {
+                                                        <tr>
+                                                            <td>@(solicitud.Auto != null ? $"{solicitud.Auto.Marca} {solicitud.Auto.Modelo}" : "N/A")</td>
+                                                            <td>@solicitud.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                                                            <td>@solicitud.PorcentajeSolicitado%</td>
+                                                            <td>
+                                                                @if (!solicitud.Aprobada.HasValue)
+                                                                {
+                                                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                                                }
+                                                                else if (solicitud.Aprobada.Value)
+                                                                {
+                                                                    <span class="badge bg-success">Aprobada</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-danger">Rechazada</span>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reservas activas -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-success text-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Reservas Activas</h5>
+                                        <a asp-action="Reservas" class="btn btn-sm btn-light">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    @if (!Model.ReservasActivas.Any())
+                                    {
+                                        <div class="alert alert-info">
+                                            <p class="mb-0">No hay reservas activas.</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Auto</th>
+                                                        <th>Cliente</th>
+                                                        <th>Fecha Reserva</th>
+                                                        <th>Expira</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var reserva in Model.ReservasActivas)
+                                                    {
+                                                        <tr class="@(reserva.EstaVencida ? "table-danger" : "")">
+                                                            <td>@(reserva.Auto != null ? $"{reserva.Auto.Marca} {reserva.Auto.Modelo}" : "N/A")</td>
+                                                            <td>@(reserva.Usuario?.Nombre ?? "N/A")</td>
+                                                            <td>@reserva.FechaReserva.ToString("dd/MM/yyyy")</td>
+                                                            <td>@reserva.FechaExpiracion.ToString("dd/MM/yyyy")</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fila con ventas y clientes -->
+                    <div class="row">
+                        <!-- Ventas recientes -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-info text-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Ventas Recientes</h5>
+                                        <a asp-action="Ventas" class="btn btn-sm btn-light">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    @if (!Model.VentasRecientes.Any())
+                                    {
+                                        <div class="alert alert-info">
+                                            <p class="mb-0">No hay ventas recientes.</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Auto</th>
+                                                        <th>Cliente</th>
+                                                        <th>Fecha</th>
+                                                        <th>Monto</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var venta in Model.VentasRecientes)
+                                                    {
+                                                        <tr>
+                                                            <td>@(venta.Auto != null ? $"{venta.Auto.Marca} {venta.Auto.Modelo}" : "N/A")</td>
+                                                            <td>@(venta.Cliente?.Nombre ?? "N/A")</td>
+                                                            <td>@venta.Fecha.ToString("dd/MM/yyyy")</td>
+                                                            <td>@CurrencyFormatter.FormatCRC(venta.MontoFinal)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clientes recientes -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-warning text-dark">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Clientes Recientes</h5>
+                                        <a asp-action="Clientes" class="btn btn-sm btn-light">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    @if (!Model.ClientesRecientes.Any())
+                                    {
+                                        <div class="alert alert-info">
+                                            <p class="mb-0">No hay clientes recientes.</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nombre</th>
+                                                        <th>Email</th>
+                                                        <th>Teléfono</th>
+                                                        <th>Acción</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var cliente in Model.ClientesRecientes)
+                                                    {
+                                                        <tr>
+                                                            <td>@cliente.Nombre</td>
+                                                            <td>@cliente.Email</td>
+                                                            <td>@cliente.PhoneNumber</td>
+                                                            <td>
+                                                                <a asp-action="DetalleCliente" asp-route-id="@cliente.Id" class="btn btn-sm btn-outline-primary">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .border-left-primary {
+            border-left: 4px solid #4e73df !important;
+        }
+        .border-left-success {
+            border-left: 4px solid #1cc88a !important;
+        }
+        .border-left-info {
+            border-left: 4px solid #36b9cc !important;
+        }
+        .border-left-warning {
+            border-left: 4px solid #f6c23e !important;
+        }
+        .text-xs {
+            font-size: 0.7rem;
+        }
+        .text-gray-300 {
+            color: #dddfeb !important;
+        }
+        .text-gray-800 {
+            color: #5a5c69 !important;
+        }
+    </style>
+} 

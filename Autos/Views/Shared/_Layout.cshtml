@@ -95,6 +95,11 @@
                                             </a>
                                         </li>
                                         <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Clientes">
+                                                <i class="fa-solid fa-user-group me-1"></i>Clientes
+                                            </a>
+                                        </li>
+                                        <li>
                                             <a class="dropdown-item" asp-controller="Admin" asp-action="ConfigurarDescuento">
                                                 <i class="fa-solid fa-percent me-1"></i>Configurar Descuentos
                                             </a>
@@ -110,19 +115,84 @@
                             
                             @if (User.IsInRole("Recepcionista"))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Account" asp-action="CrearUsuario">
-                                        <i class="fa-solid fa-user-plus me-1"></i>Registrar Cliente
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fa-solid fa-clipboard-check me-1"></i>Panel Recepcionista
                                     </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Recepcionista" asp-action="Dashboard">
+                                                <i class="fa-solid fa-gauge-high me-1"></i>Dashboard
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Recepcionista" asp-action="CatalogoAutos">
+                                                <i class="fa-solid fa-car me-1"></i>Catálogo de Autos
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Recepcionista" asp-action="BuscarClientes">
+                                                <i class="fa-solid fa-search me-1"></i>Buscar Clientes
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="CrearUsuario">
+                                                <i class="fa-solid fa-user-plus me-1"></i>Registrar Cliente
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Recepcionista" asp-action="VendedoresClientes">
+                                                <i class="fa-solid fa-users me-1"></i>Vendedores y Clientes
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Recepcionista" asp-action="Diagnostico">
+                                                <i class="fa-solid fa-wrench me-1"></i>Diagnostico
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                             }
                             
                             @if (User.IsInRole("Vendedor"))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Ventas" asp-action="Index">
-                                        <i class="fa-solid fa-money-check-dollar me-1"></i>Ventas
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fa-solid fa-user-tag me-1"></i>Panel Vendedor
                                     </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Vendedor" asp-action="Dashboard">
+                                                <i class="fa-solid fa-gauge-high me-1"></i>Dashboard
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Vendedor" asp-action="SolicitudesDescuento">
+                                                <i class="fa-solid fa-percent me-1"></i>Solicitudes de Descuento
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Vendedor" asp-action="Reservas">
+                                                <i class="fa-solid fa-calendar-check me-1"></i>Reservas
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Vendedor" asp-action="Ventas">
+                                                <i class="fa-solid fa-money-bill-wave me-1"></i>Ventas
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Vendedor" asp-action="Clientes">
+                                                <i class="fa-solid fa-users me-1"></i>Mis Clientes
+                                            </a>
+                                        </li>
+                                        <li class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Ventas" asp-action="Create">
+                                                <i class="fa-solid fa-plus me-1"></i>Nueva Venta
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                             }
 
@@ -217,6 +287,90 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("Styles", required: false)
+    
+    <!-- Modal para credenciales de cliente -->
+    @if (TempData["CredencialesCliente"] != null)
+    {
+        <div class="modal fade" id="credencialesModal" tabindex="-1" aria-labelledby="credencialesModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="credencialesModalLabel">
+                            <i class="fa-solid fa-key me-2"></i>Credenciales de Acceso
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <i class="fa-solid fa-circle-exclamation me-2"></i>
+                            <strong>Importante:</strong> Proporcione estas credenciales al cliente. Serán necesarias para acceder al portal.
+                        </div>
+                        <div class="card border-primary mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Datos de acceso</h5>
+                                <div id="credencialesContent">
+                                    @Html.Raw(TempData["CredencialesCliente"])
+                                </div>
+                            </div>
+                        </div>
+                        @if (TempData["VendedorAsignado"] != null)
+                        {
+                            <div class="alert alert-info">
+                                <i class="fa-solid fa-user-tie me-2"></i>
+                                <strong>Vendedor Asignado:</strong> @TempData["VendedorAsignado"]
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="btnCopiarCredenciales">
+                            <i class="fa-solid fa-copy me-2"></i>Copiar Credenciales
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-xmark me-2"></i>Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Mostrar el modal automáticamente
+                var credencialesModal = new bootstrap.Modal(document.getElementById('credencialesModal'));
+                credencialesModal.show();
+                
+                // Funcionalidad para copiar al portapapeles
+                document.getElementById('btnCopiarCredenciales').addEventListener('click', function() {
+                    var credencialesDiv = document.getElementById('credencialesContent');
+                    var usuario = credencialesDiv.querySelector('.row:nth-child(1) .col-8').textContent.trim();
+                    var password = credencialesDiv.querySelector('.row:nth-child(2) .col-8').textContent.trim();
+                    var vendedor = '@TempData["VendedorAsignado"]';
+                    
+                    var textoCopiar = `Credenciales de Acceso:\n\nUsuario: ${usuario}\nContraseña: ${password}`;
+                    if (vendedor) {
+                        textoCopiar += `\n\nVendedor Asignado: ${vendedor}`;
+                    }
+                    
+                    navigator.clipboard.writeText(textoCopiar).then(() => {
+                        var btn = document.getElementById('btnCopiarCredenciales');
+                        btn.innerHTML = '<i class="fa-solid fa-check me-2"></i>¡Copiado!';
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-success');
+                        
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="fa-solid fa-copy me-2"></i>Copiar Credenciales';
+                            btn.classList.remove('btn-success');
+                            btn.classList.add('btn-primary');
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Error al copiar: ', err);
+                        alert('No se pudo copiar al portapapeles. Por favor, copie manualmente.');
+                    });
+                });
+            });
+        </script>
+    }
 </body>
 </html>
 

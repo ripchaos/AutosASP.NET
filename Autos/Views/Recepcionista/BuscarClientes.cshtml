@@ -1,0 +1,271 @@
+@{
+    ViewData["Title"] = "Buscar Clientes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Buscar Clientes</h1>
+        <a asp-action="Dashboard" class="btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Volver al Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Buscador de Clientes 
+                @if (ViewBag.Sucursal != null)
+                {
+                    <span class="text-dark">- Sucursal: @ViewBag.Sucursal</span>
+                }
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle mr-2"></i>
+                Solo se mostrarán clientes asignados a vendedores de tu sucursal.
+            </div>
+            
+            <!-- Formulario con AJAX -->
+            <div class="row mb-4">
+                <div class="col-md-8 offset-md-2">
+                    <div class="input-group">
+                        <input type="text" id="busquedaCliente" class="form-control" 
+                               placeholder="Buscar por nombre, email o identificación" />
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" id="btnBuscar">
+                                <i class="fas fa-search fa-sm"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                    <small class="form-text text-muted">Ingrese al menos 2 caracteres para iniciar la búsqueda</small>
+                </div>
+            </div>
+            
+            <!-- Formulario alternativo (no AJAX) -->
+            <div class="row mt-3 mb-3">
+                <div class="col-md-8 offset-md-2">
+                    <h6 class="text-center mb-3">Si la búsqueda no funciona, pruebe esta alternativa:</h6>
+                    <form asp-action="BuscarClientesForm" method="post" class="form-inline justify-content-center">
+                        @Html.AntiForgeryToken()
+                        <div class="input-group w-100">
+                            <input type="text" name="termino" class="form-control" 
+                                   placeholder="Buscar cliente..." required minlength="2" />
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-search"></i> Buscar Alternativamente
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div id="resultadosBusqueda" class="mt-4">
+                <div class="table-responsive d-none" id="tablaResultados">
+                    <table class="table table-bordered" id="clientesTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Identificación</th>
+                                <th>Vendedor Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultadosClientes">
+                            <!-- Aquí se cargarán los resultados -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center" id="mensajeBusqueda">
+                    <p class="text-muted">Ingrese un término de búsqueda para encontrar clientes</p>
+                </div>
+                <div class="text-center d-none" id="sinResultados">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle mr-2"></i> No se encontraron clientes con el término de búsqueda
+                    </div>
+                </div>
+                <div class="text-center d-none" id="cargando">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Buscando clientes...</p>
+                </div>
+            </div>
+            
+            <!-- Resultados del formulario no AJAX -->
+            @if (ViewBag.ClientesEncontrados != null)
+            {
+                <div class="mt-4">
+                    <h5 class="mb-3">
+                        Resultados de la búsqueda
+                        @if (!string.IsNullOrEmpty(ViewBag.TerminoBusqueda))
+                        {
+                            <span class="text-muted">para "@ViewBag.TerminoBusqueda"</span>
+                        }
+                        @if (ViewBag.Sucursal != null)
+                        {
+                            <small class="text-muted ms-2">(Sucursal: @ViewBag.Sucursal)</small>
+                        }
+                    </h5>
+                    
+                    @if (((System.Collections.IList)ViewBag.ClientesEncontrados).Count == 0)
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No se encontraron clientes en tu sucursal que coincidan con estos criterios de búsqueda.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Identificación</th>
+                                        <th>Vendedor Asignado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var cliente in ViewBag.ClientesEncontrados)
+                                    {
+                                        <tr>
+                                            <td>@cliente.Nombre</td>
+                                            <td>@cliente.Email</td>
+                                            <td>@cliente.Identificacion</td>
+                                            <td>@(ViewBag.NombresVendedores != null && cliente.VendedorAsignadoId != null ? 
+                                                ViewBag.NombresVendedores[cliente.VendedorAsignadoId] : "Sin vendedor asignado")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            console.log("Script inicializado");
+            
+            // Manejar la búsqueda al hacer clic en el botón
+            $('#btnBuscar').on('click', function(e) {
+                console.log("Botón de búsqueda clickeado");
+                e.preventDefault();
+                realizarBusqueda();
+            });
+            
+            // También buscar al presionar Enter
+            $('#busquedaCliente').on('keypress', function(e) {
+                if (e.which == 13) {
+                    console.log("Enter presionado en el campo de búsqueda");
+                    e.preventDefault();
+                    realizarBusqueda();
+                }
+            });
+            
+            function realizarBusqueda() {
+                const termino = $('#busquedaCliente').val().trim();
+                console.log("Término de búsqueda:", termino);
+                
+                if (termino.length < 2) {
+                    alert('Ingrese al menos 2 caracteres para buscar');
+                    return;
+                }
+                
+                // Mostrar spinner
+                $('#mensajeBusqueda').addClass('d-none');
+                $('#tablaResultados').addClass('d-none');
+                $('#sinResultados').addClass('d-none');
+                $('#cargando').removeClass('d-none');
+                
+                // Generar token antifalsificación
+                const token = $('input[name="__RequestVerificationToken"]').val();
+                
+                // Realizar la búsqueda AJAX
+                $.ajax({
+                    url: '@Url.Action("BuscarClientes", "Recepcionista")',
+                    type: 'POST',
+                    data: { termino: termino },
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log("Respuesta recibida:", data);
+                        // Ocultar spinner
+                        $('#cargando').addClass('d-none');
+                        
+                        if (!data || data.length === 0 || data.error) {
+                            // No hay resultados o hubo un error
+                            $('#sinResultados').removeClass('d-none');
+                            $('#tablaResultados').addClass('d-none');
+                            
+                            if (data && data.error) {
+                                $('#sinResultados .alert').html('<i class="fas fa-exclamation-triangle me-2"></i> ' + data.error);
+                            } else {
+                                $('#sinResultados .alert').html('<i class="fas fa-info-circle me-2"></i> No se encontraron clientes en tu sucursal con el término de búsqueda');
+                            }
+                            
+                            console.log("No se encontraron resultados o hubo un error");
+                        } else {
+                            // Mostrar resultados
+                            $('#resultadosClientes').empty();
+                            
+                            $.each(data, function(i, cliente) {
+                                console.log("Procesando cliente:", cliente);
+                                let fila = `<tr>
+                                    <td>${cliente.nombre || ''}</td>
+                                    <td>${cliente.email || ''}</td>
+                                    <td>${cliente.identificacion || ''}</td>
+                                    <td>${cliente.vendedorNombre || 'Sin vendedor asignado'}</td>
+                                </tr>`;
+                                
+                                $('#resultadosClientes').append(fila);
+                            });
+                            
+                            $('#tablaResultados').removeClass('d-none');
+                            $('#sinResultados').addClass('d-none');
+                            
+                            // Inicializar DataTable
+                            try {
+                                if ($.fn.DataTable.isDataTable('#clientesTable')) {
+                                    $('#clientesTable').DataTable().destroy();
+                                }
+                                
+                                $('#clientesTable').DataTable({
+                                    "language": {
+                                        "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                                    }
+                                });
+                                console.log("DataTable inicializada correctamente");
+                            } catch (err) {
+                                console.error("Error al inicializar DataTable:", err);
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#cargando').addClass('d-none');
+                        console.error("Error en la petición AJAX:", xhr.responseText);
+                        console.error("Status:", status);
+                        console.error("Error:", error);
+                        $('#sinResultados').removeClass('d-none');
+                        $('#sinResultados .alert').html('<i class="fas fa-exclamation-triangle me-2"></i> Error al realizar la búsqueda. Intente nuevamente.');
+                    }
+                });
+            }
+            
+            // Realizar una búsqueda inicial con el valor predefinido si existe
+            if ($('#busquedaCliente').val().trim().length >= 2) {
+                realizarBusqueda();
+            }
+        });
+    </script>
+} 

@@ -52,6 +52,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQXNpZ25hclZlbmRlZG9yZXNTdWN1cnNhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Admin/Clientes.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQ2xpZW50ZXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Admin/Configuracion.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQ29uZmlndXJhY2lvbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -92,12 +96,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGFzaGJvYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Admin/DetalleCliente.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGV0YWxsZUNsaWVudGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Admin/EditarSucursal.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWRpdGFyU3VjdXJzYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Admin/EliminarSucursal.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWxpbWluYXJTdWN1cnNhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Admin/ReasignarVendedor.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cUmVhc2lnbmFyVmVuZGVkb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Admin/RestablecerPassword.cshtml]
@@ -128,6 +140,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0b3NcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Autos/Reservar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0b3NcUmVzZXJ2YXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Gerente/AdministrarVendedores.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR2VyZW50ZVxBZG1pbmlzdHJhclZlbmRlZG9yZXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -152,12 +168,60 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Recepcionista/BuscarClientes.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZXBjaW9uaXN0YVxCdXNjYXJDbGllbnRlcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Recepcionista/Dashboard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZXBjaW9uaXN0YVxEYXNoYm9hcmQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Recepcionista/DetalleVendedor.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZXBjaW9uaXN0YVxEZXRhbGxlVmVuZGVkb3IuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Recepcionista/VendedoresClientes.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZXBjaW9uaXN0YVxWZW5kZWRvcmVzQ2xpZW50ZXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Vendedor/Clientes.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVmVuZGVkb3JcQ2xpZW50ZXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Vendedor/Dashboard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVmVuZGVkb3JcRGFzaGJvYXJkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Vendedor/DetalleCliente.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVmVuZGVkb3JcRGV0YWxsZUNsaWVudGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Vendedor/ReservarAuto.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVmVuZGVkb3JcUmVzZXJ2YXJBdXRvLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Vendedor/Reservas.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVmVuZGVkb3JcUmVzZXJ2YXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Vendedor/SeleccionarAuto.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVmVuZGVkb3JcU2VsZWNjaW9uYXJBdXRvLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Vendedor/SolicitudesDescuento.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVmVuZGVkb3JcU29saWNpdHVkZXNEZXNjdWVudG8uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Vendedor/Ventas.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVmVuZGVkb3JcVmVudGFzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Ventas/AutorizarDescuentos.cshtml]

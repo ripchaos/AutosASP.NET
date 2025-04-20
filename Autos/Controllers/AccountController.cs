@@ -100,7 +100,9 @@ namespace Autos.Controllers
                     user.VendedorAsignadoId = vendedorAsignado.Id;
                 }
 
-                var result = await _userManager.CreateAsync(user, model.Password);
+                // Generar contraseña aleatoria
+                var password = GenerarPasswordAleatoria();
+                var result = await _userManager.CreateAsync(user, password);
 
                 if (result.Succeeded)
                 {
@@ -113,6 +115,31 @@ namespace Autos.Controllers
                     // Asignar rol de Cliente
                     await _userManager.AddToRoleAsync(user, "Cliente");
                     
+                    // Preparar mensaje con credenciales
+                    var credencialesHtml = $@"
+                        <div class='row mb-2'>
+                            <div class='col-4 fw-bold'>Usuario:</div>
+                            <div class='col-8'>{user.Email}</div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-4 fw-bold'>Contraseña:</div>
+                            <div class='col-8'>{password}</div>
+                        </div>";
+                    
+                    TempData["CredencialesCliente"] = credencialesHtml;
+                    
+                    // Obtener nombre del vendedor asignado
+                    string vendedorNombre = "ningún vendedor";
+                    if (user.VendedorAsignadoId != null)
+                    {
+                        var vendedor = await _userManager.FindByIdAsync(user.VendedorAsignadoId);
+                        if (vendedor != null)
+                        {
+                            vendedorNombre = vendedor.Nombre;
+                        }
+                    }
+                    TempData["VendedorAsignado"] = vendedorNombre;
+
                     // Para administrador: opción de asignar acceso completo (todos los roles)
                     if (User.IsInRole("Administrador") && Request.Form.Keys.Contains("asignarAccesoCompleto"))
                     {
@@ -129,21 +156,11 @@ namespace Autos.Controllers
                     }
                     else
                     {
-                        // Obtener nombre del vendedor asignado para el mensaje de éxito
-                        string vendedorNombre = "ningún vendedor";
-                        if (user.VendedorAsignadoId != null)
-                        {
-                            var vendedor = await _userManager.FindByIdAsync(user.VendedorAsignadoId);
-                            if (vendedor != null)
-                            {
-                                vendedorNombre = vendedor.Nombre;
-                            }
-                        }
-                        
                         TempData["Success"] = $"Cliente {model.Nombre} registrado exitosamente y asignado a {vendedorNombre}.";
                     }
                     
-                    return RedirectToAction("CrearUsuario");
+                    // Redirigir a una acción diferente para evitar problemas con el reenvío del formulario
+                    return RedirectToAction("Index", "Home");
                 }
 
                 foreach (var error in result.Errors)
@@ -174,6 +191,40 @@ namespace Autos.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        /// <summary>
+        /// Genera una contraseña aleatoria segura
+        /// </summary>
+        private string GenerarPasswordAleatoria()
+        {
+            const string caracteresPermitidos = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*";
+            const int longitud = 12;
+            var random = new Random();
+            var password = new char[longitud];
+
+            // Asegurar al menos una mayúscula, una minúscula, un número y un carácter especial
+            password[0] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[random.Next(26)];
+            password[1] = "abcdefghijklmnopqrstuvwxyz"[random.Next(26)];
+            password[2] = "0123456789"[random.Next(10)];
+            password[3] = "!@#$%^&*"[random.Next(8)];
+
+            // Llenar el resto con caracteres aleatorios
+            for (int i = 4; i < longitud; i++)
+            {
+                password[i] = caracteresPermitidos[random.Next(caracteresPermitidos.Length)];
+            }
+
+            // Mezclar la contraseña
+            for (int i = password.Length - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                var temp = password[i];
+                password[i] = password[j];
+                password[j] = temp;
+            }
+
+            return new string(password);
         }
     }
 }

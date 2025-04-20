@@ -1,0 +1,156 @@
+@model IEnumerable<Autos.Models.Auto>
+
+@{
+    ViewData["Title"] = "Seleccionar Auto Interesado";
+    var clienteId = ViewBag.ClienteId;
+    var nombreCliente = ViewBag.NombreCliente;
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-car me-2"></i>Seleccionar Auto Interesado para @nombreCliente
+            </h6>
+            <div>
+                <a asp-action="DetalleCliente" asp-route-id="@clienteId" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Detalle del Cliente
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="SeleccionarAuto" method="get" class="row g-3">
+                        <input type="hidden" name="clienteId" value="@clienteId" />
+                        @if (ViewBag.IntentarReservar)
+                        {
+                            <input type="hidden" name="intentarReservar" value="true" />
+                        }
+                        
+                        <div class="col-md-3">
+                            <label for="marca" class="form-label">Marca</label>
+                            <select name="marca" id="marca" class="form-select">
+                                <option value="">Todas</option>
+                                @foreach (var marca in ViewBag.Marcas)
+                                {
+                                    if (ViewBag.FiltroMarca == marca)
+                                    {
+                                        <option value="@marca" selected>@marca</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@marca">@marca</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="modelo" class="form-label">Modelo</label>
+                            <input type="text" name="modelo" id="modelo" class="form-control" value="@ViewBag.FiltroModelo" />
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label for="anioDesde" class="form-label">Año desde</label>
+                            <input type="number" name="anioDesde" id="anioDesde" class="form-control" value="@ViewBag.FiltroAnioDesde" />
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label for="anioHasta" class="form-label">Año hasta</label>
+                            <input type="number" name="anioHasta" id="anioHasta" class="form-control" value="@ViewBag.FiltroAnioHasta" />
+                        </div>
+                        
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>Filtrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Listado de Autos -->
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @foreach (var auto in Model)
+                {
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">@auto.Marca @auto.Modelo (@auto.Anio)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <span class="badge @(auto.Disponibilidad && auto.EstadoReserva == "Disponible" ? "bg-success" : "bg-danger")">
+                                        @(auto.Disponibilidad && auto.EstadoReserva == "Disponible" ? "Disponible" : "No Disponible")
+                                    </span>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-6 fw-bold text-muted">Precio:</div>
+                                    <div class="col-6 text-end">₡@auto.Precio.ToString("N0")</div>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-6 fw-bold text-muted">Color:</div>
+                                    <div class="col-6 text-end">@auto.Color</div>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-6 fw-bold text-muted">Transmisión:</div>
+                                    <div class="col-6 text-end">@auto.Transmision</div>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-6 fw-bold text-muted">Kilometraje:</div>
+                                    <div class="col-6 text-end">@auto.Kilometraje km</div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                @if (ViewBag.IntentarReservar)
+                                {
+                                    <a asp-action="ReservarAuto" asp-route-clienteId="@clienteId" asp-route-autoId="@auto.Id" class="btn btn-primary w-100">
+                                        <i class="fas fa-calendar-alt me-2"></i>Reservar Este Auto
+                                    </a>
+                                }
+                                else
+                                {
+                                    <form asp-action="AsignarAutoInteresado" method="post">
+                                        <input type="hidden" name="clienteId" value="@clienteId" />
+                                        <input type="hidden" name="autoId" value="@auto.Id" />
+                                        @if (ViewBag.IntentarReservar)
+                                        {
+                                            <input type="hidden" name="intentarReservar" value="true" />
+                                        }
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="fas fa-check-circle me-2"></i>Seleccionar Este Auto
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle me-2"></i>No se encontraron autos con los criterios especificados.
+                </div>
+            }
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,92 @@
+@model List<Autos.Models.ViewModels.ClienteViewModel>
+
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<div class="container">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">
+                    <i class="fa-solid fa-users me-2"></i>Gestión de Clientes
+                </h2>
+                <a asp-controller="Account" asp-action="CrearUsuario" class="btn btn-success">
+                    <i class="fa-solid fa-user-plus me-1"></i>Registrar Nuevo Cliente
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="tabla-clientes">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Identificación</th>
+                            <th>Vendedor Asignado</th>
+                            <th>Reservas Activas</th>
+                            <th>Compras Realizadas</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var clienteVM in Model)
+                        {
+                            <tr>
+                                <td>@clienteVM.Cliente.Nombre</td>
+                                <td>@clienteVM.Cliente.Email</td>
+                                <td>@clienteVM.Cliente.Identificacion</td>
+                                <td>@clienteVM.VendedorNombre</td>
+                                <td>
+                                    @if (clienteVM.ReservasActivas > 0)
+                                    {
+                                        <span class="badge bg-primary">@clienteVM.ReservasActivas</span>
+                                    }
+                                    else
+                                    {
+                                        <span>0</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (clienteVM.ComprasRealizadas > 0)
+                                    {
+                                        <span class="badge bg-success">@clienteVM.ComprasRealizadas</span>
+                                    }
+                                    else
+                                    {
+                                        <span>0</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-controller="Admin" asp-action="DetalleCliente" asp-route-id="@clienteVM.Cliente.Id" class="btn btn-sm btn-outline-primary" title="Ver detalle" data-bs-toggle="tooltip">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <a asp-controller="Admin" asp-action="ReasignarVendedor" asp-route-id="@clienteVM.Cliente.Id" class="btn btn-sm btn-outline-warning" title="Reasignar vendedor" data-bs-toggle="tooltip">
+                                            <i class="fa-solid fa-user-tag"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#tabla-clientes').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                }
+            });
+            
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+} 

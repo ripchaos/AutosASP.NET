@@ -63,25 +63,25 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label asp-for="Password" class="form-label"></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                                <input asp-for="Password" type="password" class="form-control" placeholder="Ingrese contraseña" />
-                            </div>
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label asp-for="AutoInteresadoId" class="form-label"></label>
+                            <label asp-for="AutoInteresadoId" class="form-label">Auto Interesado (Opcional)</label>
                             <select asp-for="AutoInteresadoId" class="form-select" asp-items="ViewBag.Autos">
                                 <option value="">-- Seleccione un auto --</option>
                             </select>
-                            <span asp-validation-for="AutoInteresadoId" class="text-danger"></span>
+                            <div class="form-text text-muted">
+                                <i class="fa-solid fa-info-circle me-1"></i>
+                                Puede seleccionar un auto ahora o dejarlo para más tarde. El vendedor podrá asignar un auto durante la reserva o venta.
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fa-solid fa-info-circle me-2"></i>
+                            La contraseña será generada automáticamente y se mostrará al finalizar el registro.
                         </div>
                     </div>
                 </div>
                 
                 <input type="hidden" asp-for="Rol" value="Cliente" />
+                <input type="hidden" asp-for="Password" value="" />
                 
                 @if (User.IsInRole("Administrador"))
                 {

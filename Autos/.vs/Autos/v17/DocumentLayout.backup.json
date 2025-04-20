@@ -3,24 +3,32 @@
   "WorkspaceRootPath": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\views\\admin\\usuarios.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:views\\admin\\usuarios.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\views\\admin\\configuracion.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:views\\admin\\configuracion.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\views\\autos\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:views\\autos\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\views\\admin\\usuarios.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:views\\admin\\usuarios.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\views\\admin\\configuracionroles.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:views\\admin\\configuracionroles.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\controllers\\autoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:controllers\\autoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{13010B70-8A4C-440A-A01F-45D2F4C377CB}|Autos.csproj|c:\\users\\rip\\documents\\github\\autosasp.net\\autos\\models\\auto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -39,45 +47,82 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Home\\Index.cshtml",
-              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
-              "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Home\\Index.cshtml",
-              "RelativeToolTip": "Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAACQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-19T03:24:50.899Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
               "Title": "Usuarios.cshtml",
               "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Admin\\Usuarios.cshtml",
               "RelativeDocumentMoniker": "Views\\Admin\\Usuarios.cshtml",
               "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Admin\\Usuarios.cshtml",
               "RelativeToolTip": "Views\\Admin\\Usuarios.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGEAAABdAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-19T03:17:32.521Z",
+              "WhenOpened": "2025-04-20T19:13:05.973Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Autos\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Autos\\Index.cshtml",
+              "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Autos\\Index.cshtml",
+              "RelativeToolTip": "Views\\Autos\\Index.cshtml",
+              "ViewState": "AgIAAHcAAAAAAAAAAAArwH4AAABOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-20T00:06:33.197Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-19T03:24:50.899Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAH8AAAAAAAAAAAAkwIsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-09T04:54:37.696Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "AdminController.cs",
-              "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Controllers\\AdminController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
-              "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Controllers\\AdminController.cs",
-              "RelativeToolTip": "Controllers\\AdminController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFQCAAAiAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-18T21:46:04.74Z",
+              "Title": "ConfiguracionRoles.cshtml",
+              "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Admin\\ConfiguracionRoles.cshtml",
+              "RelativeDocumentMoniker": "Views\\Admin\\ConfiguracionRoles.cshtml",
+              "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Admin\\ConfiguracionRoles.cshtml",
+              "RelativeToolTip": "Views\\Admin\\ConfiguracionRoles.cshtml",
+              "ViewState": "AgIAADMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-19T03:37:01.59Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Configuracion.cshtml",
+              "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Admin\\Configuracion.cshtml",
+              "RelativeDocumentMoniker": "Views\\Admin\\Configuracion.cshtml",
+              "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Admin\\Configuracion.cshtml",
+              "RelativeToolTip": "Views\\Admin\\Configuracion.cshtml",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-19T03:37:00.681Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 6,
               "Title": "AutosController.cs",
               "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Controllers\\AutosController.cs",
               "RelativeDocumentMoniker": "Controllers\\AutosController.cs",
@@ -85,12 +130,11 @@
               "RelativeToolTip": "Controllers\\AutosController.cs",
               "ViewState": "AgIAAFcAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-09T05:28:14.803Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-09T05:28:14.803Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "Auto.cs",
               "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Models\\Auto.cs",
               "RelativeDocumentMoniker": "Models\\Auto.cs",
@@ -99,19 +143,6 @@
               "ViewState": "AgIAADwAAAAAAAAAAAAswAIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-09T05:22:56.659Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAKcAAAAAAAAAAAAAwKIAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-09T04:54:37.696Z",
-              "EditorCaption": ""
             }
           ]
         }

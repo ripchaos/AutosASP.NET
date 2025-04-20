@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Autos.Models
 {
@@ -16,8 +17,28 @@ namespace Autos.Models
         public int AutoId { get; set; }
         public Auto? Auto { get; set; }
 
+        // Vendedor asociado a la reserva
+        public string? VendedorId { get; set; }
+        public Usuario? Vendedor { get; set; }
+
         [Required]
         public DateTime FechaReserva { get; set; } = DateTime.Now;
+
+        // Fecha de expiración de la reserva (por defecto 7 días)
+        public DateTime FechaExpiracion { get; set; } = DateTime.Now.AddDays(7);
+
+        // Estado de la reserva: Activa, Vencida, Cancelada, Convertida a Venta
+        [Required]
+        [StringLength(20)]
+        public string Estado { get; set; } = "Activa";
+
+        // Comentarios sobre la reserva
+        [StringLength(500)]
+        public string? Comentarios { get; set; }
+
+        // Propiedad calculada para determinar si la reserva está vencida
+        [NotMapped]
+        public bool EstaVencida => FechaExpiracion < DateTime.Now && Estado == "Activa";
     }
 }
 

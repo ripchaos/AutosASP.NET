@@ -23,11 +23,9 @@ namespace Autos.Models
         [Display(Name = "Correo Electrónico")]
         public required string Email { get; set; }
 
-        [Required(ErrorMessage = "La contraseña es obligatoria")]
         [DataType(DataType.Password)]
         [Display(Name = "Contraseña")]
-        [StringLength(100, ErrorMessage = "La contraseña debe tener al menos {2} caracteres", MinimumLength = 6)]
-        public required string Password { get; set; }
+        public string? Password { get; set; }
 
         [Required(ErrorMessage = "El rol es obligatorio")]
         [Display(Name = "Rol")]

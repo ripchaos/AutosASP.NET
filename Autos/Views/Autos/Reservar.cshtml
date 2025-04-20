@@ -1,0 +1,90 @@
+@model Autos.Models.Auto
+
+@{
+    ViewData["Title"] = $"Reservar {Model.Marca} {Model.Modelo}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Autos" asp-action="Index">Catálogo</a></li>
+            <li class="breadcrumb-item active">Reservar Auto</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-calendar-plus me-2"></i>Reservar Auto
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Detalles del Vehículo</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Marca:</span>
+                                    <strong>@Model.Marca</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Modelo:</span>
+                                    <strong>@Model.Modelo</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Año:</span>
+                                    <strong>@Model.Anio</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Precio:</span>
+                                    <strong class="text-success">@Model.PrecioFormateado</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Sucursal:</span>
+                                    <strong>@Model.Sucursal?.Nombre</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <form asp-action="ProcesarReserva" method="post">
+                        <input type="hidden" name="AutoId" value="@Model.Id" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Duración de la Reserva (días)</label>
+                            <input type="number" name="DuracionReserva" class="form-control" min="1" max="30" value="3" required />
+                            <div class="form-text">La reserva puede durar entre 1 y 30 días.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Comentarios</label>
+                            <textarea name="Comentarios" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-check me-2"></i>Confirmar Reserva
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Volver al Catálogo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 
