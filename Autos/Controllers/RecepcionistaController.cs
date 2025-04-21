@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Autos.Data;
 using Autos.Models;
 using Autos.Models.ViewModels;
+using Autos.Services.Interfaces;
 
 namespace Autos.Controllers
 {
@@ -17,13 +18,25 @@ namespace Autos.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IUsuarioService _usuarioService;
+        private readonly ISucursalService _sucursalService;
+        private readonly IAutoService _autoService;
+        private readonly IReservaService _reservaService;
 
         public RecepcionistaController(
             ApplicationDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IUsuarioService usuarioService,
+            ISucursalService sucursalService,
+            IAutoService autoService,
+            IReservaService reservaService)
         {
             _context = context;
             _userManager = userManager;
+            _usuarioService = usuarioService;
+            _sucursalService = sucursalService;
+            _autoService = autoService;
+            _reservaService = reservaService;
         }
 
         // GET: Recepcionista/Dashboard
@@ -36,7 +49,7 @@ namespace Autos.Controllers
                 TempData["Info"] = "Dashboard de Recepcionista cargado correctamente. " + DateTime.Now.ToString();
                 
                 // Obtener la recepcionista actual
-                var recepcionista = await _userManager.GetUserAsync(User);
+                var recepcionista = await _usuarioService.ObtenerUsuarioActualAsync();
                 Console.WriteLine($"Usuario obtenido: {(recepcionista == null ? "null" : recepcionista.Email)}");
                 
                 if (recepcionista == null)
@@ -47,7 +60,7 @@ namespace Autos.Controllers
                 }
 
                 // Verificar el rol del usuario
-                var roles = await _userManager.GetRolesAsync(recepcionista);
+                var roles = await _usuarioService.ObtenerRolesDeUsuarioAsync(recepcionista);
                 Console.WriteLine($"Roles del usuario: {string.Join(", ", roles)}");
                 
                 if (!roles.Contains("Recepcionista"))
@@ -59,9 +72,7 @@ namespace Autos.Controllers
 
                 // Obtener la sucursal de la recepcionista
                 Console.WriteLine($"Buscando asignación de sucursal para usuario ID: {recepcionista.Id}");
-                var asignacionSucursal = await _context.UsuariosSucursales
-                    .Include(us => us.Sucursal)
-                    .FirstOrDefaultAsync(us => us.UsuarioId == recepcionista.Id && us.Activo);
+                var asignacionSucursal = await _sucursalService.ObtenerAsignacionUsuarioSucursalAsync(recepcionista.Id);
 
                 Console.WriteLine($"Asignación de sucursal encontrada: {(asignacionSucursal == null ? "null" : "encontrada")}");
                 Console.WriteLine($"Sucursal en asignación: {(asignacionSucursal?.Sucursal == null ? "null" : asignacionSucursal.Sucursal.Nombre)}");
@@ -98,9 +109,8 @@ namespace Autos.Controllers
                 };
 
                 // Obtener estadísticas
-                viewModel.AutosDisponibles = await _context.Autos
-                    .Where(a => a.SucursalId == sucursal.Id && a.Disponibilidad && a.EstadoReserva == "Disponible")
-                    .CountAsync();
+                var autosDisponibles = await _autoService.ObtenerAutosDisponiblesAsync();
+                viewModel.AutosDisponibles = autosDisponibles.Count(a => a.SucursalId == sucursal.Id);
 
                 // Usar _userManager.Users en lugar de _context.Users para mantener consistencia
                 var vendedoresIds = await _context.UsuariosSucursales
@@ -111,6 +121,11 @@ namespace Autos.Controllers
                 viewModel.VendedoresTotales = await _userManager.Users
                     .Where(u => vendedoresIds.Contains(u.Id) && u.Rol == "Vendedor")
                     .CountAsync();
+
+                // Reemplazar con el siguiente código
+                // Obtener vendedores de la sucursal usando el servicio
+                var vendedores = await _sucursalService.ObtenerVendedoresDeSucursalAsync(sucursal.Id);
+                viewModel.VendedoresTotales = vendedores.Count();
 
                 viewModel.ClientesRegistradosHoy = await _userManager.Users
                     .Where(u => u.Rol == "Cliente" && u.FechaRegistro.HasValue && 
@@ -214,25 +229,23 @@ namespace Autos.Controllers
                     return Json(new { error = "No estás asignado a ninguna sucursal." });
                 }
 
-                // Obtener los IDs de los vendedores de la sucursal de la recepcionista
-                var vendedoresSucursal = await _context.UsuariosSucursales
-                    .Where(us => us.SucursalId == sucursal.Id && us.Activo)
-                    .Select(us => us.UsuarioId)
-                    .ToListAsync();
+                // Obtener los vendedores de la sucursal
+                var vendedores = await _sucursalService.ObtenerVendedoresDeSucursalAsync(sucursal.Id);
+                var vendedoresIds = vendedores.Select(v => v.Id).ToList();
+                
+                // Crear un diccionario de vendedores para obtener sus nombres
+                var vendedoresDict = vendedores.ToDictionary(v => v.Id, v => v.Nombre);
 
-                // Obtener diccionario de vendedores de la sucursal
-                var vendedores = await _userManager.Users
-                    .Where(u => vendedoresSucursal.Contains(u.Id) && u.Rol == "Vendedor")
-                    .ToDictionaryAsync(v => v.Id, v => v.Nombre);
-
-                // Buscar solo clientes asignados a vendedores de la sucursal actual
-                var clientes = await _userManager.Users
-                    .Where(u => u.Rol == "Cliente" &&
-                           (u.Nombre.Contains(termino) ||
-                            u.Email != null && u.Email.Contains(termino) ||
-                            u.Identificacion != null && u.Identificacion.Contains(termino)) &&
-                           u.VendedorAsignadoId != null && 
-                           vendedoresSucursal.Contains(u.VendedorAsignadoId))
+                // Obtener todos los clientes
+                var todosLosClientes = await _usuarioService.ObtenerUsuariosPorRolAsync("Cliente");
+                
+                // Filtrar clientes por término de búsqueda y asignación a vendedores de esta sucursal
+                var clientes = todosLosClientes
+                    .Where(u => (u.Nombre?.Contains(termino) == true ||
+                                 u.Email?.Contains(termino) == true ||
+                                 u.Identificacion?.Contains(termino) == true) &&
+                                u.VendedorAsignadoId != null && 
+                                vendedoresIds.Contains(u.VendedorAsignadoId))
                     .Select(c => new
                     {
                         id = c.Id,
@@ -240,12 +253,12 @@ namespace Autos.Controllers
                         email = c.Email ?? string.Empty,
                         identificacion = c.Identificacion ?? string.Empty,
                         vendedorId = c.VendedorAsignadoId ?? string.Empty,
-                        vendedorNombre = c.VendedorAsignadoId != null && vendedores.ContainsKey(c.VendedorAsignadoId) 
-                            ? vendedores[c.VendedorAsignadoId] 
+                        vendedorNombre = c.VendedorAsignadoId != null && vendedoresDict.ContainsKey(c.VendedorAsignadoId) 
+                            ? vendedoresDict[c.VendedorAsignadoId] 
                             : "Sin vendedor asignado"
                     })
                     .Take(10)
-                    .ToListAsync();
+                    .ToList();
                     
                 Console.WriteLine($"BuscarClientes - Clientes encontrados en sucursal {sucursal.Nombre}: {clientes.Count}");
                 return Json(clientes);
@@ -276,30 +289,28 @@ namespace Autos.Controllers
                 return View("BuscarClientes");
             }
 
-            // Obtener los IDs de los vendedores de la sucursal
-            var vendedoresSucursal = await _context.UsuariosSucursales
-                .Where(us => us.SucursalId == sucursal.Id && us.Activo)
-                .Select(us => us.UsuarioId)
-                .ToListAsync();
-
-            // Obtener diccionario de vendedores de la sucursal
-            var vendedores = await _userManager.Users
-                .Where(u => vendedoresSucursal.Contains(u.Id) && u.Rol == "Vendedor")
-                .ToDictionaryAsync(v => v.Id, v => v.Nombre);
+            // Obtener los vendedores de la sucursal
+            var vendedores = await _sucursalService.ObtenerVendedoresDeSucursalAsync(sucursal.Id);
+            var vendedoresIds = vendedores.Select(v => v.Id).ToList();
             
-            ViewBag.NombresVendedores = vendedores;
+            // Crear un diccionario de vendedores para obtener sus nombres
+            var vendedoresDict = vendedores.ToDictionary(v => v.Id, v => v.Nombre);
+            
+            ViewBag.NombresVendedores = vendedoresDict;
             ViewBag.Sucursal = sucursal.Nombre;
 
-            // Buscar solo clientes asignados a vendedores de la sucursal actual
-            var clientes = await _userManager.Users
-                .Where(u => u.Rol == "Cliente" &&
-                        (u.Nombre.Contains(termino) ||
-                         u.Email != null && u.Email.Contains(termino) ||
-                         u.Identificacion != null && u.Identificacion.Contains(termino)) &&
-                        u.VendedorAsignadoId != null && 
-                        vendedoresSucursal.Contains(u.VendedorAsignadoId))
+            // Obtener todos los clientes
+            var todosLosClientes = await _usuarioService.ObtenerUsuariosPorRolAsync("Cliente");
+            
+            // Filtrar clientes por término de búsqueda y asignación a vendedores de esta sucursal
+            var clientes = todosLosClientes
+                .Where(u => (u.Nombre?.Contains(termino) == true ||
+                             u.Email?.Contains(termino) == true ||
+                             u.Identificacion?.Contains(termino) == true) &&
+                            u.VendedorAsignadoId != null && 
+                            vendedoresIds.Contains(u.VendedorAsignadoId))
                 .Take(20)
-                .ToListAsync();
+                .ToList();
 
             ViewBag.ClientesEncontrados = clientes;
             ViewBag.TerminoBusqueda = termino;
@@ -341,7 +352,7 @@ namespace Autos.Controllers
             };
             
             // Obtener los vendedores de la sucursal
-            var vendedores = await ObtenerVendedoresDeSucursal(sucursal.Id);
+            var vendedores = await _sucursalService.ObtenerVendedoresDeSucursalAsync(sucursal.Id);
             
             // Para cada vendedor, obtener sus clientes asignados
             foreach (var vendedor in vendedores)
@@ -352,9 +363,10 @@ namespace Autos.Controllers
                 };
                 
                 // Obtener clientes asignados al vendedor
-                vendedorConClientes.Clientes = await _userManager.Users
-                    .Where(u => u.VendedorAsignadoId == vendedor.Id && u.Rol == "Cliente")
-                    .ToListAsync();
+                var clientes = await _usuarioService.ObtenerUsuariosPorRolAsync("Cliente");
+                vendedorConClientes.Clientes = clientes
+                    .Where(u => u.VendedorAsignadoId == vendedor.Id)
+                    .ToList();
                 
                 viewModel.Vendedores.Add(vendedorConClientes);
             }
@@ -379,28 +391,36 @@ namespace Autos.Controllers
             }
             
             // Verificar que el vendedor pertenece a la sucursal de la recepcionista
-            var vendedorSucursal = await _context.UsuariosSucursales
-                .AnyAsync(us => us.UsuarioId == id && us.SucursalId == sucursal.Id && us.Activo);
+            var asignaciones = await _sucursalService.ObtenerAsignacionesDeSucursalAsync(sucursal.Id);
+            var vendedorAsignado = asignaciones.Any(us => us.UsuarioId == id && us.Activo);
                 
-            if (!vendedorSucursal)
+            if (!vendedorAsignado)
             {
                 TempData["Error"] = "El vendedor no pertenece a tu sucursal.";
                 return RedirectToAction("VendedoresClientes");
             }
             
             // Obtener el vendedor y sus clientes
-            var vendedor = await _userManager.FindByIdAsync(id);
-            if (vendedor == null || vendedor.Rol != "Vendedor")
+            var vendedor = await _usuarioService.ObtenerUsuarioPorIdAsync(id);
+            if (vendedor == null)
             {
-                return NotFound();
+                return NotFound("Vendedor no encontrado");
             }
+            
+            // Verificar que es un vendedor
+            var roles = await _usuarioService.ObtenerRolesDeUsuarioAsync(vendedor);
+            if (!roles.Contains("Vendedor"))
+            {
+                return NotFound("El usuario no es un vendedor");
+            }
+            
+            var clientes = await _usuarioService.ObtenerUsuariosPorRolAsync("Cliente");
+            var clientesDelVendedor = clientes.Where(u => u.VendedorAsignadoId == vendedor.Id).ToList();
             
             var vendedorConClientes = new VendedorConClientes
             {
                 Vendedor = vendedor,
-                Clientes = await _userManager.Users
-                    .Where(u => u.VendedorAsignadoId == vendedor.Id && u.Rol == "Cliente")
-                    .ToListAsync()
+                Clientes = clientesDelVendedor
             };
             
             return View(vendedorConClientes);
@@ -423,17 +443,14 @@ namespace Autos.Controllers
             try
             {
                 // Obtener el usuario recepcionista actual
-                var recepcionista = await _userManager.GetUserAsync(User);
+                var recepcionista = await _usuarioService.ObtenerUsuarioActualAsync();
                 if (recepcionista == null)
                 {
                     return null;
                 }
 
                 // Obtener la asignación de sucursal
-                var asignacionSucursal = await _context.UsuariosSucursales
-                    .Include(us => us.Sucursal)
-                    .FirstOrDefaultAsync(us => us.UsuarioId == recepcionista.Id && us.Activo);
-
+                var asignacionSucursal = await _sucursalService.ObtenerAsignacionUsuarioSucursalAsync(recepcionista.Id);
                 return asignacionSucursal?.Sucursal;
             }
             catch (Exception ex)
@@ -448,16 +465,8 @@ namespace Autos.Controllers
         /// </summary>
         private async Task<List<Usuario>> ObtenerVendedoresDeSucursal(int sucursalId)
         {
-            var vendedoresSucursal = await _context.UsuariosSucursales
-                .Where(us => us.SucursalId == sucursalId && us.Activo)
-                .Select(us => us.UsuarioId)
-                .ToListAsync();
-
-            var vendedores = await _userManager.Users
-                .Where(u => vendedoresSucursal.Contains(u.Id) && u.Rol == "Vendedor")
-                .ToListAsync();
-
-            return vendedores;
+            var vendedores = await _sucursalService.ObtenerVendedoresDeSucursalAsync(sucursalId);
+            return vendedores.ToList();
         }
 
         /// <summary>
@@ -467,14 +476,22 @@ namespace Autos.Controllers
         {
             if (model.Auto != null && model.Auto.Id > 0)
             {
-                var auto = await _context.Autos
-                    .Include(a => a.Sucursal)
-                    .FirstOrDefaultAsync(a => a.Id == model.Auto.Id);
+                var auto = await _autoService.ObtenerAutoPorIdAsync(model.Auto.Id);
                 
-                if (auto != null && auto.Sucursal != null)
+                if (auto != null)
                 {
                     model.Auto = auto;
-                    model.Vendedores = await ObtenerVendedoresDeSucursal(auto.SucursalId);
+                    
+                    // Obtener la sucursal si no está incluida
+                    if (auto.Sucursal == null && auto.SucursalId > 0)
+                    {
+                        auto.Sucursal = await _sucursalService.ObtenerSucursalPorIdAsync(auto.SucursalId);
+                    }
+                    
+                    if (auto.Sucursal != null)
+                    {
+                        model.Vendedores = await ObtenerVendedoresDeSucursal(auto.SucursalId);
+                    }
                 }
             }
         }
@@ -492,9 +509,7 @@ namespace Autos.Controllers
                 // Si hay un auto seleccionado, recargarlo
                 if (model.AutoId.HasValue)
                 {
-                    model.Auto = await _context.Autos
-                        .Include(a => a.Sucursal)
-                        .FirstOrDefaultAsync(a => a.Id == model.AutoId.Value);
+                    model.Auto = await _autoService.ObtenerAutoPorIdAsync(model.AutoId.Value);
                 }
             }
             else

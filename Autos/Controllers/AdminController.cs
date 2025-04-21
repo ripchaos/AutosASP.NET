@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Autos.Services;
 using Autos.Models.ViewModels;
+using Autos.Services.Interfaces;
 
 namespace Autos.Controllers
 {
@@ -21,13 +22,32 @@ namespace Autos.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly IUsuarioService _usuarioService;
+        private readonly IReservaService _reservaService;
+        private readonly IVentaService _ventaService;
+        private readonly ISucursalService _sucursalService;
+        private readonly IAutoService _autoService;
 
-        public AdminController(UserManager<Usuario> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context, IEmailService emailService)
+        public AdminController(
+            UserManager<Usuario> userManager, 
+            RoleManager<IdentityRole> roleManager, 
+            ApplicationDbContext context, 
+            IEmailService emailService,
+            IUsuarioService usuarioService,
+            IReservaService reservaService,
+            IVentaService ventaService,
+            ISucursalService sucursalService,
+            IAutoService autoService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
             _emailService = emailService;
+            _usuarioService = usuarioService;
+            _reservaService = reservaService;
+            _ventaService = ventaService;
+            _sucursalService = sucursalService;
+            _autoService = autoService;
         }
 
         // 🔹 Vista para el Panel de Administración
@@ -42,13 +62,7 @@ namespace Autos.Controllers
 
                 foreach (var auto in autosConEstadoReservaVacio)
                 {
-                    auto.EstadoReserva = "Disponible";
-                    _context.Autos.Update(auto);
-                }
-
-                if (autosConEstadoReservaVacio.Any())
-                {
-                    await _context.SaveChangesAsync();
+                    await _autoService.ActualizarEstadoReservaAsync(auto.Id, "Disponible");
                 }
 
                 // Obtener estadísticas para el panel de administración
@@ -64,59 +78,24 @@ namespace Autos.Controllers
                     .ToListAsync();
                 
                 // Obtener ventas recientes
-                var ventasRecientes = await _context.Ventas
-                    .Include(v => v.Cliente)
-                    .Include(v => v.Vendedor)
-                    .Include(v => v.Auto)
-                    .OrderByDescending(v => v.Fecha)
-                    .Take(5)
-                    .ToListAsync();
+                var ventasRecientes = (await _ventaService.ObtenerVentasReciententesAsync(5)).ToList();
                 
                 // Calcular estadísticas adicionales
                 var fechaInicioMes = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-                var ventasDelMes = await _context.Ventas
-                    .Where(v => v.Fecha >= fechaInicioMes)
-                    .CountAsync();
+                var ventasDelMes = await _ventaService.ContarVentasMesActualAsync();
                 
-                // Cargar las ventas en memoria y calcular los totales
-                var todasLasVentas = await _context.Ventas.ToListAsync();
-                var ventasDeEsteMes = todasLasVentas.Where(v => v.Fecha >= fechaInicioMes).ToList();
+                // Estadísticas de ventas
+                var ingresosTotales = await _ventaService.CalcularIngresosTotalesAsync();
+                var ingresosMensuales = await _ventaService.CalcularIngresosMensualesAsync(DateTime.Now.Month, DateTime.Now.Year);
                 
-                var ingresosTotales = todasLasVentas.Any() 
-                    ? todasLasVentas.Sum(v => v.MontoFinal)
-                    : 0;
-                
-                var ingresosMensuales = ventasDeEsteMes.Any()
-                    ? ventasDeEsteMes.Sum(v => v.MontoFinal)
-                    : 0;
-                
-                var autosDisponibles = await _context.Autos
-                    .Where(a => a.Disponibilidad)
-                    .CountAsync();
+                var autosDisponibles = (await _autoService.ObtenerAutosDisponiblesAsync()).Count();
                 
                 // Obtener distribución de usuarios por rol
-                var todosLosUsuarios = await _userManager.Users.ToListAsync();
-                var totalAdministradores = 0;
-                var totalGerentes = 0;
-                var totalVendedores = 0;
-                var totalRecepcionistas = 0;
-                var totalClientes = 0;
-                
-                foreach (var usuario in todosLosUsuarios)
-                {
-                    var roles = await _userManager.GetRolesAsync(usuario);
-                    
-                    if (roles.Contains("Administrador"))
-                        totalAdministradores++;
-                    else if (roles.Contains("Gerente"))
-                        totalGerentes++;
-                    else if (roles.Contains("Vendedor"))
-                        totalVendedores++;
-                    else if (roles.Contains("Recepcionista"))
-                        totalRecepcionistas++;
-                    else
-                        totalClientes++;
-                }
+                var totalAdministradores = (await _usuarioService.ObtenerUsuariosPorRolAsync("Administrador")).Count();
+                var totalGerentes = (await _usuarioService.ObtenerUsuariosPorRolAsync("Gerente")).Count();
+                var totalVendedores = (await _usuarioService.ObtenerUsuariosPorRolAsync("Vendedor")).Count();
+                var totalRecepcionistas = (await _usuarioService.ObtenerUsuariosPorRolAsync("Recepcionista")).Count();
+                var totalClientes = (await _usuarioService.ObtenerUsuariosPorRolAsync("Cliente")).Count();
                 
                 // Crear el viewmodel
                 var viewModel = new AdminDashboardViewModel
@@ -205,6 +184,13 @@ namespace Autos.Controllers
                     Direccion = model.Direccion
                 };
 
+                // Asegurar que password no sea nulo antes de crear el usuario
+                if (string.IsNullOrEmpty(model.Password))
+                {
+                    ModelState.AddModelError(string.Empty, "La contraseña no puede estar vacía.");
+                    return View(model);
+                }
+                
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
@@ -239,19 +225,20 @@ namespace Autos.Controllers
         // 🔹 Listar Clientes
         public async Task<IActionResult> Clientes()
         {
-            var clientes = await _userManager.Users
-                .Where(u => u.Rol == "Cliente")
-                .OrderBy(u => u.Nombre)
-                .ToListAsync();
+            var clientes = await _usuarioService.ObtenerUsuariosPorRolAsync("Cliente");
+            var clientesOrdenados = clientes.OrderBy(u => u.Nombre).ToList();
 
             // Agregar información del vendedor para cada cliente
             var clientesViewModel = new List<ClienteViewModel>();
             
-            foreach (var cliente in clientes)
+            foreach (var cliente in clientesOrdenados)
             {
-                var vendedor = cliente.VendedorAsignadoId != null 
-                    ? await _userManager.FindByIdAsync(cliente.VendedorAsignadoId) 
-                    : null;
+                // Obtener el vendedor asignado si existe
+                Usuario? vendedor = null;
+                if (!string.IsNullOrEmpty(cliente.VendedorAsignadoId))
+                {
+                    vendedor = await _usuarioService.ObtenerUsuarioPorIdAsync(cliente.VendedorAsignadoId);
+                }
                 
                 clientesViewModel.Add(new ClienteViewModel
                 {
@@ -272,43 +259,36 @@ namespace Autos.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["Error"] = "ID de cliente no válido";
+                TempData["Error"] = "ID de cliente inválido";
                 return RedirectToAction("Clientes");
             }
 
-            var cliente = await _userManager.FindByIdAsync(id);
-            if (cliente == null || cliente.Rol != "Cliente")
+            var cliente = await _usuarioService.ObtenerUsuarioPorIdAsync(id);
+            if (cliente == null)
             {
                 TempData["Error"] = "Cliente no encontrado";
                 return RedirectToAction("Clientes");
             }
 
-            // Obtener el vendedor asignado
-            var vendedor = cliente.VendedorAsignadoId != null 
-                ? await _userManager.FindByIdAsync(cliente.VendedorAsignadoId) 
-                : null;
+            // Obtener el vendedor asignado si existe
+            Usuario? vendedor = null;
+            if (!string.IsNullOrEmpty(cliente.VendedorAsignadoId))
+            {
+                vendedor = await _usuarioService.ObtenerUsuarioPorIdAsync(cliente.VendedorAsignadoId);
+            }
 
             // Obtener reservas del cliente
-            var reservas = await _context.Reservas
-                .Include(r => r.Auto)
-                .Where(r => r.UsuarioId == cliente.Id)
-                .OrderByDescending(r => r.FechaReserva)
-                .ToListAsync();
+            var reservas = await _reservaService.ObtenerReservasPorClienteAsync(cliente.Id);
 
             // Obtener compras del cliente
-            var compras = await _context.Ventas
-                .Include(v => v.Auto)
-                .Include(v => v.Vendedor)
-                .Where(v => v.ClienteId == cliente.Id)
-                .OrderByDescending(v => v.Fecha)
-                .ToListAsync();
+            var compras = await _ventaService.ObtenerVentasPorClienteAsync(cliente.Id);
 
             var viewModel = new DetalleClienteViewModel
             {
                 Cliente = cliente,
                 VendedorAsignado = vendedor,
-                Reservas = reservas,
-                Compras = compras
+                Reservas = reservas.ToList(),
+                Compras = compras.ToList()
             };
 
             return View(viewModel);
@@ -319,24 +299,24 @@ namespace Autos.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["Error"] = "ID de cliente no válido";
+                TempData["Error"] = "ID de cliente inválido";
                 return RedirectToAction("Clientes");
             }
 
-            var cliente = await _userManager.FindByIdAsync(id);
-            if (cliente == null || cliente.Rol != "Cliente")
+            var cliente = await _usuarioService.ObtenerUsuarioPorIdAsync(id);
+            if (cliente == null)
             {
                 TempData["Error"] = "Cliente no encontrado";
                 return RedirectToAction("Clientes");
             }
 
-            // Obtener el vendedor actual
+            // Obtener el vendedor actual asignado
             var vendedorActual = cliente.VendedorAsignadoId != null 
-                ? await _userManager.FindByIdAsync(cliente.VendedorAsignadoId) 
+                ? await _usuarioService.ObtenerUsuarioPorIdAsync(cliente.VendedorAsignadoId) 
                 : null;
 
-            // Obtener todos los vendedores para la selección
-            var vendedores = await _userManager.GetUsersInRoleAsync("Vendedor");
+            // Obtener la lista de vendedores disponibles
+            var vendedores = await _usuarioService.ObtenerUsuariosPorRolAsync("Vendedor");
             var vendedoresSelectList = vendedores
                 .OrderBy(v => v.Nombre)
                 .Select(v => new SelectListItem
@@ -351,7 +331,7 @@ namespace Autos.Controllers
             {
                 ClienteId = cliente.Id,
                 NombreCliente = cliente.Nombre,
-                EmailCliente = cliente.Email,
+                EmailCliente = cliente.Email ?? string.Empty,
                 VendedorActualId = cliente.VendedorAsignadoId,
                 VendedorActualNombre = vendedorActual?.Nombre ?? "No asignado",
                 Vendedores = vendedoresSelectList
@@ -365,105 +345,150 @@ namespace Autos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReasignarVendedor(ReasignarVendedorViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                // Recargar la lista de vendedores en caso de error
-                var vendedores = await _userManager.GetUsersInRoleAsync("Vendedor");
-                model.Vendedores = vendedores
-                    .OrderBy(v => v.Nombre)
-                    .Select(v => new SelectListItem
-                    {
-                        Value = v.Id,
-                        Text = v.Nombre,
-                        Selected = v.Id == model.NuevoVendedorId
-                    })
-                    .ToList();
-
-                return View(model);
-            }
-
-            var cliente = await _userManager.FindByIdAsync(model.ClienteId);
-            if (cliente == null || cliente.Rol != "Cliente")
-            {
-                TempData["Error"] = "Cliente no encontrado";
-                return RedirectToAction("Clientes");
-            }
-
-            // Verificar si el vendedor existe
-            if (!string.IsNullOrEmpty(model.NuevoVendedorId))
-            {
-                var vendedor = await _userManager.FindByIdAsync(model.NuevoVendedorId);
-                if (vendedor == null || vendedor.Rol != "Vendedor")
+                try
                 {
-                    ModelState.AddModelError("NuevoVendedorId", "Vendedor no válido");
+                    // Obtener el cliente
+                    var cliente = await _usuarioService.ObtenerUsuarioPorIdAsync(model.ClienteId);
+                    if (cliente == null)
+                    {
+                        TempData["Error"] = "Cliente no encontrado";
+                        return RedirectToAction("Clientes");
+                    }
+
+                    // Verificar si se seleccionó un vendedor y si existe
+                    if (string.IsNullOrEmpty(model.NuevoVendedorId))
+                    {
+                        ModelState.AddModelError("NuevoVendedorId", "Debe seleccionar un vendedor");
+                        
+                        // Recargar la lista de vendedores
+                        var vendedores = await _usuarioService.ObtenerUsuariosPorRolAsync("Vendedor");
+                        model.Vendedores = vendedores
+                            .OrderBy(v => v.Nombre)
+                            .Select(v => new SelectListItem
+                            {
+                                Value = v.Id,
+                                Text = v.Nombre
+                            })
+                            .ToList();
+                        
+                        return View(model);
+                    }
                     
-                    // Recargar la lista de vendedores
-                    var vendedores = await _userManager.GetUsersInRoleAsync("Vendedor");
-                    model.Vendedores = vendedores
-                        .OrderBy(v => v.Nombre)
-                        .Select(v => new SelectListItem
-                        {
-                            Value = v.Id,
-                            Text = v.Nombre,
-                            Selected = v.Id == model.NuevoVendedorId
-                        })
-                        .ToList();
+                    var vendedor = await _usuarioService.ObtenerUsuarioPorIdAsync(model.NuevoVendedorId);
+                    if (vendedor == null)
+                    {
+                        ModelState.AddModelError("NuevoVendedorId", "El vendedor seleccionado no existe");
+                        
+                        // Recargar la lista de vendedores
+                        var vendedores = await _usuarioService.ObtenerUsuariosPorRolAsync("Vendedor");
+                        model.Vendedores = vendedores
+                            .OrderBy(v => v.Nombre)
+                            .Select(v => new SelectListItem
+                            {
+                                Value = v.Id,
+                                Text = v.Nombre
+                            })
+                            .ToList();
+                        
+                        return View(model);
+                    }
 
-                    return View(model);
+                    // Verificar si es el mismo vendedor
+                    if (cliente.VendedorAsignadoId == model.NuevoVendedorId)
+                    {
+                        // El vendedor ya está asignado, redirigir sin cambios
+                        TempData["Info"] = "No se realizaron cambios, el vendedor seleccionado ya estaba asignado";
+                        return RedirectToAction("DetalleCliente", new { id = model.ClienteId });
+                    }
+
+                    // Actualizar el vendedor asignado
+                    bool resultado = await _usuarioService.AsignarVendedorAClienteAsync(model.ClienteId, model.NuevoVendedorId);
+                    
+                    if (resultado)
+                    {
+                        TempData["Exito"] = "Vendedor reasignado correctamente";
+                        return RedirectToAction("DetalleCliente", new { id = model.ClienteId });
+                    }
+                    else
+                    {
+                        TempData["Error"] = "No se pudo asignar el vendedor";
+                    }
                 }
-
-                // Actualizar el vendedor asignado
-                cliente.VendedorAsignadoId = model.NuevoVendedorId;
-                await _userManager.UpdateAsync(cliente);
-
-                TempData["Success"] = $"Cliente {cliente.Nombre} reasignado correctamente al vendedor {vendedor.Nombre}";
-            }
-            else
-            {
-                // Si se seleccionó "Sin vendedor"
-                cliente.VendedorAsignadoId = null;
-                await _userManager.UpdateAsync(cliente);
-
-                TempData["Success"] = $"Cliente {cliente.Nombre} ahora no tiene vendedor asignado";
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "Error al reasignar vendedor: " + ex.Message;
+                }
             }
 
-            return RedirectToAction("Clientes");
+            // Si llegamos aquí, hubo un error. Recargar lista de vendedores
+            var vendedoresLista = await _usuarioService.ObtenerUsuariosPorRolAsync("Vendedor");
+            model.Vendedores = vendedoresLista
+                .OrderBy(v => v.Nombre)
+                .Select(v => new SelectListItem
+                {
+                    Value = v.Id,
+                    Text = v.Nombre
+                })
+                .ToList();
+
+            return View(model);
         }
 
         // 🔹 Asignar Roles a Usuarios
         [HttpPost]
         public async Task<IActionResult> AsignarRol(string userId, string nuevoRol)
         {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(nuevoRol))
+            try
             {
-                TempData["Error"] = "Debe seleccionar un usuario y un rol válido.";
-                return RedirectToAction("Usuarios");
-            }
+                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(nuevoRol))
+                {
+                    return Json(new { success = false, message = "Datos incompletos" });
+                }
 
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
+                // Verificar si el rol es válido
+                if (!await _roleManager.RoleExistsAsync(nuevoRol))
+                {
+                    return Json(new { success = false, message = "El rol especificado no existe" });
+                }
+
+                // Obtener el usuario
+                var usuario = await _usuarioService.ObtenerUsuarioPorIdAsync(userId);
+                if (usuario == null)
+                {
+                    return Json(new { success = false, message = "Usuario no encontrado" });
+                }
+
+                // Obtener los roles actuales del usuario
+                var rolesActuales = await _usuarioService.ObtenerRolesDeUsuarioAsync(usuario);
+
+                // Remover los roles actuales
+                foreach (var rol in rolesActuales)
+                {
+                    await _usuarioService.EliminarRolAsync(usuario, rol);
+                }
+
+                // Asignar el nuevo rol
+                var resultado = await _usuarioService.AsignarRolAsync(usuario, nuevoRol);
+
+                if (resultado)
+                {
+                    // Actualizar el campo Rol del usuario para mantener consistencia
+                    usuario.Rol = nuevoRol;
+                    await _userManager.UpdateAsync(usuario);
+
+                    return Json(new { success = true, message = "Rol asignado correctamente" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Error al asignar rol" });
+                }
+            }
+            catch (Exception ex)
             {
-                TempData["Error"] = "Usuario no encontrado.";
-                return RedirectToAction("Usuarios");
+                return Json(new { success = false, message = "Error: " + ex.Message });
             }
-
-            var rolesPermitidos = new[] { "Recepcionista", "Vendedor", "Gerente", "Cliente" };
-
-            if (!rolesPermitidos.Contains(nuevoRol))
-            {
-                TempData["Error"] = "El rol seleccionado no es válido.";
-                return RedirectToAction("Usuarios");
-            }
-
-            var rolesActuales = await _userManager.GetRolesAsync(user);
-            await _userManager.RemoveFromRolesAsync(user, rolesActuales);
-            await _userManager.AddToRoleAsync(user, nuevoRol);
-
-            user.Rol = nuevoRol;
-            await _userManager.UpdateAsync(user);
-
-            TempData["Success"] = $"Rol actualizado a {nuevoRol} correctamente.";
-            return RedirectToAction("Usuarios");
         }
 
         // 🔹 Vista para Configurar Margen de Descuento
@@ -520,9 +545,7 @@ namespace Autos.Controllers
         // 🔹 Vista para Configuración de Sucursales
         public async Task<IActionResult> ConfiguracionSucursales()
         {
-            var sucursales = await _context.Sucursales
-                .Include(s => s.Gerente)
-                .ToListAsync();
+            var sucursales = await _sucursalService.ObtenerTodasLasSucursalesAsync();
             return View(sucursales);
         }
         
@@ -767,43 +790,11 @@ namespace Autos.Controllers
                 ViewBag.TotalReservas = await _context.Reservas.CountAsync();
                 
                 // Contadores para usuarios por rol
-                var totalAdministradores = 0;
-                var totalGerentes = 0;
-                var totalVendedores = 0;
-                var totalRecepcionistas = 0;
-                var totalClientes = 0;
-                
-                // Obtener todos los usuarios
-                var allUsers = await _userManager.Users.ToListAsync();
-                
-                // Contar manualmente en lugar de usar GroupBy
-                foreach (var user in allUsers)
-                {
-                    switch (user.Rol)
-                    {
-                        case "Administrador":
-                            totalAdministradores++;
-                            break;
-                        case "Gerente":
-                            totalGerentes++;
-                            break;
-                        case "Vendedor":
-                            totalVendedores++;
-                            break;
-                        case "Recepcionista":
-                            totalRecepcionistas++;
-                            break;
-                        case "Cliente":
-                            totalClientes++;
-                            break;
-                    }
-                }
-                
-                ViewBag.TotalAdministradores = totalAdministradores;
-                ViewBag.TotalGerentes = totalGerentes;
-                ViewBag.TotalVendedores = totalVendedores;
-                ViewBag.TotalRecepcionistas = totalRecepcionistas;
-                ViewBag.TotalClientes = totalClientes;
+                ViewBag.TotalAdministradores = (await _usuarioService.ObtenerUsuariosPorRolAsync("Administrador")).Count();
+                ViewBag.TotalGerentes = (await _usuarioService.ObtenerUsuariosPorRolAsync("Gerente")).Count();
+                ViewBag.TotalVendedores = (await _usuarioService.ObtenerUsuariosPorRolAsync("Vendedor")).Count();
+                ViewBag.TotalRecepcionistas = (await _usuarioService.ObtenerUsuariosPorRolAsync("Recepcionista")).Count();
+                ViewBag.TotalClientes = (await _usuarioService.ObtenerUsuariosPorRolAsync("Cliente")).Count();
     
                 // Datos para gráficos
                 
@@ -1076,30 +1067,38 @@ namespace Autos.Controllers
         [HttpPost]
         public async Task<IActionResult> CrearRol(string nombreRol)
         {
-            if (string.IsNullOrEmpty(nombreRol))
+            try
             {
-                TempData["Error"] = "El nombre del rol no puede estar vacío";
+                if (string.IsNullOrEmpty(nombreRol))
+                {
+                    TempData["Error"] = "El nombre del rol no puede estar vacío";
+                    return RedirectToAction(nameof(ConfiguracionRoles));
+                }
+
+                if (await _roleManager.RoleExistsAsync(nombreRol))
+                {
+                    TempData["Error"] = $"El rol '{nombreRol}' ya existe";
+                    return RedirectToAction(nameof(ConfiguracionRoles));
+                }
+
+                var resultado = await _roleManager.CreateAsync(new IdentityRole(nombreRol));
+                
+                if (resultado.Succeeded)
+                {
+                    TempData["Exito"] = $"Rol '{nombreRol}' creado correctamente";
+                }
+                else
+                {
+                    TempData["Error"] = $"Error al crear el rol: {string.Join(", ", resultado.Errors.Select(e => e.Description))}";
+                }
+
                 return RedirectToAction(nameof(ConfiguracionRoles));
             }
-
-            if (await _roleManager.RoleExistsAsync(nombreRol))
+            catch (Exception ex)
             {
-                TempData["Error"] = $"El rol '{nombreRol}' ya existe";
+                TempData["Error"] = $"Error inesperado al crear el rol: {ex.Message}";
                 return RedirectToAction(nameof(ConfiguracionRoles));
             }
-
-            var resultado = await _roleManager.CreateAsync(new IdentityRole(nombreRol));
-            
-            if (resultado.Succeeded)
-            {
-                TempData["Exito"] = $"Rol '{nombreRol}' creado correctamente";
-            }
-            else
-            {
-                TempData["Error"] = $"Error al crear el rol: {string.Join(", ", resultado.Errors.Select(e => e.Description))}";
-            }
-
-            return RedirectToAction(nameof(ConfiguracionRoles));
         }
 
         [HttpPost]
@@ -1237,27 +1236,22 @@ namespace Autos.Controllers
         [HttpGet]
         public async Task<IActionResult> ObtenerUsuariosPorRol(string rolId)
         {
-            if (string.IsNullOrEmpty(rolId))
+            try
             {
-                return BadRequest("ID de rol no válido");
-            }
-            
-            var rol = await _roleManager.FindByIdAsync(rolId);
-            if (rol == null)
-            {
-                return NotFound("Rol no encontrado");
-            }
+                var rol = await _roleManager.FindByIdAsync(rolId);
+                if (rol == null || string.IsNullOrEmpty(rol.Name))
+                {
+                    return Json(new { success = false, message = "Rol no encontrado o inválido" });
+                }
 
-            var usuariosEnRol = await _userManager.GetUsersInRoleAsync(rol.Name ?? string.Empty);
-            
-            var resultado = usuariosEnRol.Select(u => new 
-            {
-                id = u.Id,
-                nombre = u.Nombre,
-                email = u.Email
-            }).ToList();
+                var usuarios = await _usuarioService.ObtenerUsuariosPorRolAsync(rol.Name ?? "");
 
-            return Json(resultado);
+                return Json(new { success = true, usuarios = usuarios.Select(u => new { u.Id, u.UserName, u.Email }) });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al obtener usuarios: " + ex.Message });
+            }
         }
 
         // 🔹 Restablecer Contraseña de Usuario
@@ -1265,22 +1259,24 @@ namespace Autos.Controllers
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> RestablecerPassword(string userId)
         {
-            if (userId == null)
+            if (string.IsNullOrEmpty(userId))
             {
-                return NotFound();
+                TempData["Error"] = "ID de usuario inválido";
+                return RedirectToAction("Usuarios");
             }
 
-            var usuario = await _userManager.FindByIdAsync(userId);
+            var usuario = await _usuarioService.ObtenerUsuarioPorIdAsync(userId);
             if (usuario == null)
             {
-                return NotFound();
+                TempData["Error"] = "Usuario no encontrado";
+                return RedirectToAction("Usuarios");
             }
 
             var modelo = new RestablecerPasswordViewModel
             {
-                UserId = usuario.Id,
-                NombreUsuario = usuario.UserName ?? string.Empty,
-                Email = usuario.Email ?? string.Empty
+                UserId = userId,
+                Email = usuario.Email ?? string.Empty,
+                NombreUsuario = usuario.Nombre ?? usuario.UserName ?? "Usuario"
             };
 
             return View(modelo);
@@ -1296,77 +1292,76 @@ namespace Autos.Controllers
                 return View(modelo);
             }
 
-            var usuario = await _userManager.FindByIdAsync(modelo.UserId);
+            var usuario = await _usuarioService.ObtenerUsuarioPorIdAsync(modelo.UserId);
             if (usuario == null)
             {
-                ModelState.AddModelError(string.Empty, "Usuario no encontrado");
+                TempData["Error"] = "Usuario no encontrado";
+                return RedirectToAction("Usuarios");
+            }
+
+            if (usuario.Email != modelo.Email)
+            {
+                ModelState.AddModelError("Email", "El correo electrónico no coincide con el usuario");
                 return View(modelo);
             }
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(usuario);
-            var resultado = await _userManager.ResetPasswordAsync(usuario, token, modelo.NuevaPassword);
+            // Restablecer contraseña
+            var resultado = await _usuarioService.RestablecerPasswordAsync(usuario, modelo.NuevaPassword);
 
-            if (resultado.Succeeded)
+            if (resultado)
             {
-                TempData["Mensaje"] = "Contraseña restablecida con éxito";
-                return RedirectToAction(nameof(Usuarios));
+                TempData["Success"] = $"Contraseña restablecida correctamente para {usuario.Nombre ?? usuario.UserName}";
+                return RedirectToAction("Usuarios");
             }
 
-            foreach (var error in resultado.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
+            ModelState.AddModelError(string.Empty, "No se pudo restablecer la contraseña. Intente nuevamente.");
             return View(modelo);
         }
 
         // 🔹 Vista para Administrar Vendedores (desde vista de Admin)
         public async Task<IActionResult> AdministrarVendedoresSucursal(int? sucursalId)
         {
-            try 
+            // Si no se proporciona un ID de sucursal, redirigir a la lista de sucursales
+            if (sucursalId == null)
             {
-                if (!sucursalId.HasValue)
-                {
-                    // Si no hay sucursal seleccionada, redirigir a la lista de sucursales
-                    TempData["Info"] = "Seleccione una sucursal para administrar sus vendedores.";
-                    return RedirectToAction("ConfiguracionSucursales");
-                }
-
-                // Obtener la sucursal seleccionada
-                var sucursal = await _context.Sucursales
-                    .FirstOrDefaultAsync(s => s.Id == sucursalId);
-
-                if (sucursal == null)
-                {
-                    TempData["Error"] = "No se encontró la sucursal seleccionada.";
-                    return RedirectToAction("ConfiguracionSucursales");
-                }
-
-                // Obtener vendedores de la sucursal
-                var vendedoresSucursal = await _context.UsuariosSucursales
-                    .Include(us => us.Usuario)
-                    .Where(us => us.SucursalId == sucursal.Id)
-                    .ToListAsync();
-
-                // Obtener todos los vendedores disponibles para asignar
-                var todosVendedores = await _userManager.GetUsersInRoleAsync("Vendedor");
-                
-                var viewModel = new AdministrarVendedoresViewModel
-                {
-                    Sucursal = sucursal,
-                    VendedoresAsignados = vendedoresSucursal,
-                    VendedoresDisponibles = todosVendedores
-                        .Where(v => !vendedoresSucursal.Any(vs => vs.UsuarioId == v.Id))
-                        .ToList()
-                };
-
-                return View(viewModel);
+                return RedirectToAction("ConfiguracionSucursales");
             }
-            catch (Exception ex)
+
+            // Obtener la sucursal
+            var sucursal = await _sucursalService.ObtenerSucursalPorIdAsync(sucursalId.Value);
+            if (sucursal == null)
             {
-                TempData["Error"] = "Ocurrió un error al cargar la administración de vendedores: " + ex.Message;
-                return RedirectToAction("Dashboard");
+                TempData["Error"] = "Sucursal no encontrada";
+                return RedirectToAction("ConfiguracionSucursales");
             }
+
+            // Obtener los vendedores asignados a esta sucursal
+            var vendedoresDeSucursal = await _sucursalService.ObtenerVendedoresDeSucursalAsync(sucursalId.Value);
+
+            // Obtener las asignaciones
+            var asignaciones = await _context.UsuariosSucursales
+                .Include(us => us.Usuario)
+                .Where(us => us.SucursalId == sucursalId.Value)
+                .ToListAsync();
+
+            // Obtener todos los vendedores disponibles (que no estén ya asignados a esta sucursal)
+            var vendedoresDisponibles = await _usuarioService.ObtenerUsuariosPorRolAsync("Vendedor");
+            
+            // Filtrar los vendedores que no están asignados a esta sucursal
+            var vendedoresNoAsignados = vendedoresDisponibles
+                .Where(v => !asignaciones.Any(a => a.UsuarioId == v.Id))
+                .OrderBy(v => v.Nombre)
+                .ToList();
+
+            // Preparar el modelo para la vista
+            var viewModel = new AdministrarVendedoresViewModel
+            {
+                Sucursal = sucursal,
+                VendedoresAsignados = asignaciones,
+                VendedoresDisponibles = vendedoresNoAsignados
+            };
+
+            return View(viewModel);
         }
 
         // POST: Admin/AsignarVendedor
@@ -1374,49 +1369,59 @@ namespace Autos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AsignarVendedor(string vendedorId, int sucursalId, bool esPrincipal = false)
         {
-            // Verificar que la sucursal exista
-            var sucursal = await _context.Sucursales
-                .FirstOrDefaultAsync(s => s.Id == sucursalId);
-
-            if (sucursal == null)
+            try
             {
-                TempData["Error"] = "La sucursal seleccionada no existe.";
-                return RedirectToAction("ConfiguracionSucursales");
+                if (string.IsNullOrEmpty(vendedorId) || sucursalId <= 0)
+                {
+                    TempData["Error"] = "Datos inválidos para asignar vendedor";
+                    return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId });
+                }
+
+                // Verificar que la sucursal existe
+                var sucursal = await _sucursalService.ObtenerSucursalPorIdAsync(sucursalId);
+                if (sucursal == null)
+                {
+                    TempData["Error"] = "Sucursal no encontrada";
+                    return RedirectToAction("ConfiguracionSucursales");
+                }
+
+                // Verificar que el vendedor existe
+                var vendedor = await _usuarioService.ObtenerUsuarioPorIdAsync(vendedorId);
+                if (vendedor == null)
+                {
+                    TempData["Error"] = "Vendedor no encontrado";
+                    return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId });
+                }
+
+                // Verificar que el vendedor no está ya asignado a esta sucursal
+                bool yaAsignado = await _context.UsuariosSucursales
+                    .AnyAsync(us => us.UsuarioId == vendedorId && us.SucursalId == sucursalId);
+
+                if (yaAsignado)
+                {
+                    TempData["Info"] = "El vendedor ya está asignado a esta sucursal";
+                    return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId });
+                }
+
+                // Asignar el vendedor a la sucursal
+                bool resultado = await _sucursalService.AsignarVendedorASucursalAsync(vendedorId, sucursalId, esPrincipal);
+
+                if (resultado)
+                {
+                    TempData["Exito"] = $"Vendedor {vendedor.Nombre} asignado correctamente a la sucursal {sucursal.Nombre}";
+                }
+                else
+                {
+                    TempData["Error"] = "No se pudo asignar el vendedor a la sucursal";
+                }
+
+                return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId });
             }
-
-            // Verificar que el usuario exista y sea vendedor
-            var vendedor = await _userManager.FindByIdAsync(vendedorId);
-            if (vendedor == null || !await _userManager.IsInRoleAsync(vendedor, "Vendedor"))
+            catch (Exception ex)
             {
-                TempData["Error"] = "El usuario seleccionado no existe o no es un vendedor.";
-                return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId = sucursalId });
+                TempData["Error"] = "Error al asignar vendedor: " + ex.Message;
+                return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId });
             }
-
-            // Verificar si ya está asignado
-            var asignacionExistente = await _context.UsuariosSucursales
-                .AnyAsync(us => us.UsuarioId == vendedorId && us.SucursalId == sucursalId);
-
-            if (asignacionExistente)
-            {
-                TempData["Error"] = "Este vendedor ya está asignado a la sucursal.";
-                return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId = sucursalId });
-            }
-
-            // Crear la asignación
-            var asignacion = new UsuarioSucursal
-            {
-                UsuarioId = vendedorId,
-                SucursalId = sucursalId,
-                EsPrincipal = esPrincipal,
-                FechaAsignacion = DateTime.Now,
-                Activo = true
-            };
-
-            _context.UsuariosSucursales.Add(asignacion);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Vendedor asignado correctamente a la sucursal.";
-            return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId = sucursalId });
         }
 
         // POST: Admin/DesasignarVendedor
@@ -1424,35 +1429,41 @@ namespace Autos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DesasignarVendedor(int asignacionId, int sucursalId)
         {
-            // Obtener la asignación
-            var asignacion = await _context.UsuariosSucursales
-                .Include(us => us.Sucursal)
-                .FirstOrDefaultAsync(us => us.Id == asignacionId);
-
-            if (asignacion == null)
+            try
             {
-                TempData["Error"] = "La asignación no existe.";
-                return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId = sucursalId });
+                if (asignacionId <= 0 || sucursalId <= 0)
+                {
+                    TempData["Error"] = "Datos inválidos para desasignar vendedor";
+                    return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId });
+                }
+
+                // Asegurarse de que la sucursal existe
+                var sucursal = await _sucursalService.ObtenerSucursalPorIdAsync(sucursalId);
+                if (sucursal == null)
+                {
+                    TempData["Error"] = "Sucursal no encontrada";
+                    return RedirectToAction("ConfiguracionSucursales");
+                }
+
+                // Intentar desasignar el vendedor
+                bool resultado = await _sucursalService.DesasignarVendedorDeSucursalAsync(asignacionId);
+
+                if (resultado)
+                {
+                    TempData["Exito"] = "Vendedor desasignado correctamente de la sucursal";
+                }
+                else
+                {
+                    TempData["Error"] = "No se pudo desasignar el vendedor de la sucursal";
+                }
+
+                return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId });
             }
-
-            // Verificar si el vendedor tiene ventas registradas
-            var tieneVentasPendientes = await _context.Ventas
-                .Where(v => v.VendedorId == asignacion.UsuarioId)
-                .Select(v => new { v.Id, v.VendedorId })
-                .AnyAsync();
-
-            if (tieneVentasPendientes)
+            catch (Exception ex)
             {
-                TempData["Error"] = "No se puede desasignar porque el vendedor tiene ventas registradas.";
-                return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId = sucursalId });
+                TempData["Error"] = "Error al desasignar vendedor: " + ex.Message;
+                return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId });
             }
-
-            // Eliminar la asignación
-            _context.UsuariosSucursales.Remove(asignacion);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Vendedor desasignado correctamente de la sucursal.";
-            return RedirectToAction("AdministrarVendedoresSucursal", new { sucursalId = sucursalId });
         }
     }
 }

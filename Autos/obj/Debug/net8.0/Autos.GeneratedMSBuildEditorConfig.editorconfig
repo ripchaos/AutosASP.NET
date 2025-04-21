@@ -144,6 +144,26 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0b3NcUmVzZXJ2YXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Cliente/CancelarReserva.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZVxDYW5jZWxhclJlc2VydmEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Cliente/Dashboard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZVxEYXNoYm9hcmQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Cliente/DetalleReserva.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZVxEZXRhbGxlUmVzZXJ2YS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Cliente/MiPerfil.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZVxNaVBlcmZpbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Cliente/MisReservas.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZVxNaXNSZXNlcnZhcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Rip/Documents/Github/AutosASP.NET/Autos/Views/Gerente/AdministrarVendedores.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR2VyZW50ZVxBZG1pbmlzdHJhclZlbmRlZG9yZXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

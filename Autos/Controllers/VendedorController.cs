@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Autos.Data;
 using Autos.Models;
 using Autos.Models.ViewModels;
+using Autos.Services.Interfaces;
 
 namespace Autos.Controllers
 {
@@ -17,13 +18,25 @@ namespace Autos.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IUsuarioService _usuarioService;
+        private readonly IVentaService _ventaService;
+        private readonly IReservaService _reservaService;
+        private readonly ISolicitudDescuentoService _solicitudDescuentoService;
 
         public VendedorController(
             ApplicationDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IUsuarioService usuarioService,
+            IVentaService ventaService,
+            IReservaService reservaService,
+            ISolicitudDescuentoService solicitudDescuentoService)
         {
             _context = context;
             _userManager = userManager;
+            _usuarioService = usuarioService;
+            _ventaService = ventaService;
+            _reservaService = reservaService;
+            _solicitudDescuentoService = solicitudDescuentoService;
         }
 
         // GET: Vendedor/Dashboard
@@ -32,7 +45,7 @@ namespace Autos.Controllers
             try
             {
                 // Obtener el vendedor actual
-                var vendedor = await _userManager.GetUserAsync(User);
+                var vendedor = await _usuarioService.ObtenerUsuarioActualAsync();
                 if (vendedor == null)
                 {
                     return NotFound();
@@ -45,30 +58,19 @@ namespace Autos.Controllers
                 };
 
                 // Obtener datos de solicitudes de descuento
-                viewModel.SolicitudesDescuento = await _context.SolicitudesDescuento
-                    .Include(s => s.Auto)
-                    .Where(s => s.VendedorId == vendedor.Id)
-                    .OrderByDescending(s => s.FechaSolicitud)
-                    .Take(10)
-                    .ToListAsync();
+                var solicitudes = await _solicitudDescuentoService
+                    .ObtenerSolicitudesPorVendedorAsync(vendedor.Id);
+                viewModel.SolicitudesDescuento = solicitudes.ToList();
 
                 // Obtener datos de reservas activas
-                viewModel.ReservasActivas = await _context.Reservas
-                    .Include(r => r.Auto)
-                    .Include(r => r.Usuario)
-                    .Where(r => r.VendedorId == vendedor.Id && r.Estado == "Activa")
-                    .OrderByDescending(r => r.FechaReserva)
-                    .Take(10)
-                    .ToListAsync();
+                var reservas = await _reservaService
+                    .ObtenerReservasPorVendedorAsync(vendedor.Id);
+                viewModel.ReservasActivas = reservas.ToList();
 
                 // Obtener datos de ventas recientes
-                viewModel.VentasRecientes = await _context.Ventas
-                    .Include(v => v.Auto)
-                    .Include(v => v.Cliente)
-                    .Where(v => v.VendedorId == vendedor.Id)
-                    .OrderByDescending(v => v.Fecha)
-                    .Take(10)
-                    .ToListAsync();
+                var ventas = await _ventaService
+                    .ObtenerVentasPorVendedorAsync(vendedor.Id);
+                viewModel.VentasRecientes = ventas.ToList();
 
                 // Obtener estadísticas
                 viewModel.TotalSolicitudesPendientes = await _context.SolicitudesDescuento
@@ -80,35 +82,19 @@ namespace Autos.Controllers
                 viewModel.TotalVentas = await _context.Ventas
                     .CountAsync(v => v.VendedorId == vendedor.Id);
 
-                viewModel.TotalVentasMes = await _context.Ventas
-                    .Where(v => v.VendedorId == vendedor.Id && v.Fecha.Month == DateTime.Now.Month && v.Fecha.Year == DateTime.Now.Year)
-                    .CountAsync();
+                viewModel.TotalVentasMes = await _ventaService
+                    .ContarVentasMesAsync(vendedor.Id, DateTime.Now.Month, DateTime.Now.Year);
 
-                // Obtener ventas y calcular monto total en memoria
-                var ventas = await _context.Ventas
-                    .Where(v => v.VendedorId == vendedor.Id)
-                    .ToListAsync();
+                // Calcular monto total de ventas
+                viewModel.MontoTotalVentas = await _ventaService
+                    .CalcularMontoTotalVentasAsync(vendedor.Id);
 
-                viewModel.MontoTotalVentas = ventas.Sum(v => v.MontoFinal);
-
-                // Obtener clientes recientes
-                // Primero, obtenemos los clientes de las ventas
-                var clientesVentas = await _context.Ventas
-                    .Include(v => v.Cliente)
-                    .Where(v => v.VendedorId == vendedor.Id && v.Cliente != null)
-                    .Select(v => v.Cliente!)
-                    .ToListAsync();
-
-                // Luego, obtenemos los clientes asignados al vendedor
+                // Obtener clientes recientes del vendedor
                 var clientesAsignados = await _userManager.Users
                     .Where(u => u.VendedorAsignadoId != null && u.VendedorAsignadoId == vendedor.Id && u.Rol == "Cliente")
                     .ToListAsync();
 
-                // Combinamos las dos listas, eliminando duplicados por ID
-                viewModel.ClientesRecientes = clientesVentas
-                    .Union(clientesAsignados, new UsuarioComparer())
-                    .Take(10)
-                    .ToList();
+                viewModel.ClientesRecientes = clientesAsignados.Take(10).ToList();
 
                 return View(viewModel);
             }
@@ -116,7 +102,7 @@ namespace Autos.Controllers
             {
                 // Capturar cualquier excepción y mostrar un mensaje amigable
                 TempData["Error"] = "Ocurrió un error al cargar el dashboard: " + ex.Message;
-                return View(new VendedorDashboardViewModel { Vendedor = await _userManager.GetUserAsync(User) ?? throw new InvalidOperationException("No se pudo obtener el usuario actual") });
+                return View(new VendedorDashboardViewModel { Vendedor = await _usuarioService.ObtenerUsuarioActualAsync() ?? throw new InvalidOperationException("No se pudo obtener el usuario actual") });
             }
         }
 

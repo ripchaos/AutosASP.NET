@@ -9,6 +9,7 @@ using Autos.Data;
 using Autos.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Autos.Services.Interfaces;
 
 namespace Autos.Controllers
 {
@@ -16,13 +17,25 @@ namespace Autos.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IAutoService _autoService;
+        private readonly ISucursalService _sucursalService;
+        private readonly IUsuarioService _usuarioService;
+        private readonly IReservaService _reservaService;
 
         public AutosController(
             ApplicationDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IAutoService autoService,
+            ISucursalService sucursalService,
+            IUsuarioService usuarioService,
+            IReservaService reservaService)
         {
             _context = context;
             _userManager = userManager;
+            _autoService = autoService;
+            _sucursalService = sucursalService;
+            _usuarioService = usuarioService;
+            _reservaService = reservaService;
         }
 
         // GET: Autos
@@ -30,89 +43,89 @@ namespace Autos.Controllers
             decimal? precioMin, decimal? precioMax, string color, string categoria, int? sucursalId, 
             bool mostrarNoDisponibles = false)
         {
-            // Consulta base
-            var autos = _context.Autos
-                .Include(a => a.Sucursal)
-                .AsQueryable();
+            // Obtener todos los autos
+            var todosLosAutos = await _autoService.ObtenerTodosLosAutosAsync();
+            var listaAutos = todosLosAutos.ToList();
 
-            // Por defecto, mostrar solo autos disponibles a menos que se indique lo contrario
+            // Filtrar por disponibilidad (a menos que se indique lo contrario)
             if (!mostrarNoDisponibles)
             {
-                autos = autos.Where(a => a.Disponibilidad && a.EstadoReserva == "Disponible");
+                listaAutos = listaAutos.Where(a => a.Disponibilidad && a.EstadoReserva == "Disponible").ToList();
             }
 
             // Aplicar filtros
             if (!string.IsNullOrEmpty(marca))
             {
-                autos = autos.Where(a => a.Marca.Contains(marca));
+                listaAutos = listaAutos.Where(a => a.Marca.Contains(marca, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             if (!string.IsNullOrEmpty(modelo))
             {
-                autos = autos.Where(a => a.Modelo.Contains(modelo));
+                listaAutos = listaAutos.Where(a => a.Modelo.Contains(modelo, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             if (anioMin.HasValue)
             {
-                autos = autos.Where(a => a.Anio >= anioMin.Value);
+                listaAutos = listaAutos.Where(a => a.Anio >= anioMin.Value).ToList();
             }
 
             if (anioMax.HasValue)
             {
-                autos = autos.Where(a => a.Anio <= anioMax.Value);
+                listaAutos = listaAutos.Where(a => a.Anio <= anioMax.Value).ToList();
             }
 
             if (precioMin.HasValue)
             {
-                autos = autos.Where(a => a.Precio >= precioMin.Value);
+                listaAutos = listaAutos.Where(a => a.Precio >= precioMin.Value).ToList();
             }
 
             if (precioMax.HasValue)
             {
-                autos = autos.Where(a => a.Precio <= precioMax.Value);
+                listaAutos = listaAutos.Where(a => a.Precio <= precioMax.Value).ToList();
             }
 
             if (!string.IsNullOrEmpty(color))
             {
-                autos = autos.Where(a => a.Color == color);
+                listaAutos = listaAutos.Where(a => a.Color == color).ToList();
             }
 
             if (!string.IsNullOrEmpty(categoria))
             {
-                autos = autos.Where(a => a.Categoria == categoria);
+                listaAutos = listaAutos.Where(a => a.Categoria == categoria).ToList();
             }
 
             if (sucursalId.HasValue)
             {
-                autos = autos.Where(a => a.SucursalId == sucursalId.Value);
+                listaAutos = listaAutos.Where(a => a.SucursalId == sucursalId.Value).ToList();
             }
 
             // Cargar datos para los filtros
-            ViewBag.Marcas = await _context.Autos.Select(a => a.Marca).Distinct().OrderBy(m => m).ToListAsync();
-            ViewBag.Colores = await _context.Autos.Select(a => a.Color).Distinct().OrderBy(c => c).ToListAsync();
-            ViewBag.Categorias = await _context.Autos.Select(a => a.Categoria).Distinct().OrderBy(c => c).ToListAsync();
-            ViewBag.Sucursales = new SelectList(await _context.Sucursales.Where(s => s.Activa).ToListAsync(), "Id", "Nombre");
+            ViewBag.Marcas = todosLosAutos.Select(a => a.Marca).Distinct().OrderBy(m => m).ToList();
+            ViewBag.Colores = todosLosAutos.Select(a => a.Color).Distinct().OrderBy(c => c).ToList();
+            ViewBag.Categorias = todosLosAutos.Select(a => a.Categoria).Distinct().OrderBy(c => c).ToList();
+            
+            var sucursales = await _sucursalService.ObtenerTodasLasSucursalesAsync();
+            ViewBag.Sucursales = new SelectList(sucursales.Where(s => s.Activa), "Id", "Nombre");
 
             // Verificar el rol del usuario para mostrar acciones específicas
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated == true)
             {
-                var usuario = await _userManager.GetUserAsync(User);
+                var usuario = await _usuarioService.ObtenerUsuarioActualAsync();
                 if (usuario != null)
                 {
-                    ViewBag.UserRole = usuario.Rol;
+                    var roles = await _usuarioService.ObtenerRolesDeUsuarioAsync(usuario);
+                    ViewBag.UserRole = roles.FirstOrDefault() ?? usuario.Rol;
                     
                     // Si es recepcionista, obtener su sucursal
-                    if (usuario.Rol == "Recepcionista")
+                    if (roles.Contains("Recepcionista"))
                     {
-                        var sucursal = await _context.UsuariosSucursales
-                            .Include(us => us.Sucursal)
-                            .FirstOrDefaultAsync(us => us.UsuarioId == usuario.Id && us.Activo);
-                        ViewBag.SucursalId = sucursal?.SucursalId;
+                        var asignacion = await _sucursalService.ObtenerAsignacionUsuarioSucursalAsync(usuario.Id);
+                        ViewBag.SucursalId = asignacion?.SucursalId;
                     }
                 }
             }
 
-            return View(await autos.ToListAsync());
+            return View(listaAutos);
         }
 
         // GET: Autos/Details/5
@@ -123,22 +136,27 @@ namespace Autos.Controllers
                 return NotFound();
             }
 
-            var auto = await _context.Autos
-                .Include(a => a.Sucursal)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var auto = await _autoService.ObtenerAutoPorIdAsync(id.Value);
 
             if (auto == null)
             {
                 return NotFound();
             }
 
-            // Verificar el rol del usuario para mostrar acciones específicas
-            if (User.Identity.IsAuthenticated)
+            // Cargar la sucursal si no está incluida
+            if (auto.Sucursal == null && auto.SucursalId > 0)
             {
-                var usuario = await _userManager.GetUserAsync(User);
+                auto.Sucursal = await _sucursalService.ObtenerSucursalPorIdAsync(auto.SucursalId);
+            }
+
+            // Verificar el rol del usuario para mostrar acciones específicas
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var usuario = await _usuarioService.ObtenerUsuarioActualAsync();
                 if (usuario != null)
                 {
-                    ViewBag.UserRole = usuario.Rol;
+                    var roles = await _usuarioService.ObtenerRolesDeUsuarioAsync(usuario);
+                    ViewBag.UserRole = roles.FirstOrDefault() ?? usuario.Rol;
                 }
             }
 
@@ -147,9 +165,10 @@ namespace Autos.Controllers
 
         // GET: Autos/Create
         [Authorize(Roles = "Administrador,Gerente")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["SucursalId"] = new SelectList(_context.Sucursales.Where(s => s.Activa), "Id", "Nombre");
+            var sucursales = await _sucursalService.ObtenerTodasLasSucursalesAsync();
+            ViewData["SucursalId"] = new SelectList(sucursales.Where(s => s.Activa), "Id", "Nombre");
             return View();
         }
 
@@ -161,11 +180,17 @@ namespace Autos.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(auto);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var exito = await _autoService.GuardarAutoAsync(auto);
+                if (exito)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                // Si no se pudo guardar, mostramos un error
+                ModelState.AddModelError(string.Empty, "No se pudo crear el auto. Intente nuevamente.");
             }
-            ViewData["SucursalId"] = new SelectList(_context.Sucursales.Where(s => s.Activa), "Id", "Nombre", auto.SucursalId);
+            
+            var sucursales = await _sucursalService.ObtenerTodasLasSucursalesAsync();
+            ViewData["SucursalId"] = new SelectList(sucursales.Where(s => s.Activa), "Id", "Nombre", auto.SucursalId);
             return View(auto);
         }
 
@@ -178,12 +203,14 @@ namespace Autos.Controllers
                 return NotFound();
             }
 
-            var auto = await _context.Autos.FindAsync(id);
+            var auto = await _autoService.ObtenerAutoPorIdAsync(id.Value);
             if (auto == null)
             {
                 return NotFound();
             }
-            ViewData["SucursalId"] = new SelectList(_context.Sucursales.Where(s => s.Activa), "Id", "Nombre", auto.SucursalId);
+            
+            var sucursales = await _sucursalService.ObtenerTodasLasSucursalesAsync();
+            ViewData["SucursalId"] = new SelectList(sucursales.Where(s => s.Activa), "Id", "Nombre", auto.SucursalId);
             return View(auto);
         }
 
@@ -202,12 +229,18 @@ namespace Autos.Controllers
             {
                 try
                 {
-                    _context.Update(auto);
-                    await _context.SaveChangesAsync();
+                    var exito = await _autoService.GuardarAutoAsync(auto);
+                    if (exito)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
+                    // Si no se pudo actualizar, mostramos un error
+                    ModelState.AddModelError(string.Empty, "No se pudo actualizar el auto. Intente nuevamente.");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AutoExists(auto.Id))
+                    var existe = await _autoService.ObtenerAutoPorIdAsync(auto.Id) != null;
+                    if (!existe)
                     {
                         return NotFound();
                     }
@@ -216,9 +249,10 @@ namespace Autos.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["SucursalId"] = new SelectList(_context.Sucursales.Where(s => s.Activa), "Id", "Nombre", auto.SucursalId);
+            
+            var sucursales = await _sucursalService.ObtenerTodasLasSucursalesAsync();
+            ViewData["SucursalId"] = new SelectList(sucursales.Where(s => s.Activa), "Id", "Nombre", auto.SucursalId);
             return View(auto);
         }
 
@@ -231,12 +265,16 @@ namespace Autos.Controllers
                 return NotFound();
             }
 
-            var auto = await _context.Autos
-                .Include(a => a.Sucursal)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var auto = await _autoService.ObtenerAutoPorIdAsync(id.Value);
             if (auto == null)
             {
                 return NotFound();
+            }
+            
+            // Cargar la sucursal si no está incluida
+            if (auto.Sucursal == null && auto.SucursalId > 0)
+            {
+                auto.Sucursal = await _sucursalService.ObtenerSucursalPorIdAsync(auto.SucursalId);
             }
 
             return View(auto);
@@ -248,18 +286,8 @@ namespace Autos.Controllers
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var auto = await _context.Autos.FindAsync(id);
-            if (auto != null)
-            {
-                _context.Autos.Remove(auto);
-                await _context.SaveChangesAsync();
-            }
+            var exito = await _autoService.EliminarAutoAsync(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool AutoExists(int id)
-        {
-            return _context.Autos.Any(e => e.Id == id);
         }
 
         // GET: Autos/Reservar/5
@@ -271,21 +299,29 @@ namespace Autos.Controllers
                 return NotFound();
             }
 
-            var auto = await _context.Autos
-                .Include(a => a.Sucursal)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
+            var auto = await _autoService.ObtenerAutoPorIdAsync(id.Value);
             if (auto == null)
             {
                 return NotFound();
             }
+            
+            // Cargar la sucursal si no está incluida
+            if (auto.Sucursal == null && auto.SucursalId > 0)
+            {
+                auto.Sucursal = await _sucursalService.ObtenerSucursalPorIdAsync(auto.SucursalId);
+            }
 
             // Verificar si el auto pertenece a la sucursal del usuario
-            var usuario = await _userManager.GetUserAsync(User);
-            var sucursal = await _context.UsuariosSucursales
-                .FirstOrDefaultAsync(us => us.UsuarioId == usuario.Id && us.Activo);
+            var usuario = await _usuarioService.ObtenerUsuarioActualAsync();
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar el usuario actual.";
+                return RedirectToAction(nameof(Index));
+            }
+            
+            var asignacion = await _sucursalService.ObtenerAsignacionUsuarioSucursalAsync(usuario.Id);
 
-            if (sucursal == null || sucursal.SucursalId != auto.SucursalId)
+            if (asignacion == null || asignacion.SucursalId != auto.SucursalId)
             {
                 TempData["Error"] = "No tienes permiso para reservar autos de otras sucursales.";
                 return RedirectToAction(nameof(Index));
@@ -300,10 +336,7 @@ namespace Autos.Controllers
         [Authorize(Roles = "Recepcionista,Vendedor")]
         public async Task<IActionResult> ProcesarReserva(int AutoId, int DuracionReserva, string Comentarios)
         {
-            var auto = await _context.Autos
-                .Include(a => a.Sucursal)
-                .FirstOrDefaultAsync(m => m.Id == AutoId);
-
+            var auto = await _autoService.ObtenerAutoPorIdAsync(AutoId);
             if (auto == null)
             {
                 TempData["Error"] = "Auto no encontrado.";
@@ -311,14 +344,21 @@ namespace Autos.Controllers
             }
 
             // Verificar si el auto sigue disponible
-            if (!auto.Disponibilidad || auto.EstadoReserva != "Disponible")
+            var disponible = await _autoService.VerificarDisponibilidadAsync(AutoId);
+            if (!disponible || auto.EstadoReserva != "Disponible")
             {
                 TempData["Error"] = "El auto ya no está disponible para reserva.";
                 return RedirectToAction(nameof(Index));
             }
 
             // Crear la reserva
-            var usuario = await _userManager.GetUserAsync(User);
+            var usuario = await _usuarioService.ObtenerUsuarioActualAsync();
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar el usuario actual.";
+                return RedirectToAction(nameof(Index));
+            }
+            
             var reserva = new Reserva
             {
                 UsuarioId = usuario.Id,
@@ -330,16 +370,16 @@ namespace Autos.Controllers
                 Comentarios = Comentarios
             };
 
-            _context.Reservas.Add(reserva);
-
-            // Actualizar el estado del auto
-            auto.EstadoReserva = "Reservado";
-            auto.FechaFinReserva = reserva.FechaExpiracion;
-            _context.Autos.Update(auto);
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Reserva creada con éxito.";
+            var exito = await _reservaService.CrearReservaAsync(reserva);
+            if (exito)
+            {
+                TempData["Success"] = "Reserva creada con éxito.";
+            }
+            else
+            {
+                TempData["Error"] = "No se pudo crear la reserva. Intente nuevamente.";
+            }
+            
             return RedirectToAction(nameof(Index));
         }
     }

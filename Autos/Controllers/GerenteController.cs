@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Autos.Data;
 using Autos.Models;
 using System.Security.Claims;
+using Autos.Services.Interfaces;
 
 namespace Autos.Controllers
 {
@@ -17,13 +18,25 @@ namespace Autos.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IUsuarioService _usuarioService;
+        private readonly ISucursalService _sucursalService;
+        private readonly IVentaService _ventaService;
+        private readonly IAutoService _autoService;
 
         public GerenteController(
             ApplicationDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IUsuarioService usuarioService,
+            ISucursalService sucursalService,
+            IVentaService ventaService,
+            IAutoService autoService)
         {
             _context = context;
             _userManager = userManager;
+            _usuarioService = usuarioService;
+            _sucursalService = sucursalService;
+            _ventaService = ventaService;
+            _autoService = autoService;
         }
 
         // GET: Gerente/Dashboard
@@ -32,15 +45,14 @@ namespace Autos.Controllers
             try
             {
                 // Obtener el gerente actual
-                var usuario = await _userManager.GetUserAsync(User);
+                var usuario = await _usuarioService.ObtenerUsuarioActualAsync();
                 if (usuario == null)
                 {
                     return NotFound();
                 }
 
                 // Obtener la sucursal que administra el gerente
-                var sucursal = await _context.Sucursales
-                    .FirstOrDefaultAsync(s => s.GerenteId == usuario.Id);
+                var sucursal = await _sucursalService.ObtenerSucursalDeGerenteAsync(usuario.Id);
 
                 if (sucursal == null)
                 {
@@ -189,9 +201,8 @@ namespace Autos.Controllers
             try
             {
                 // Obtener el gerente actual y su sucursal
-                var gerente = await _userManager.GetUserAsync(User);
-                var sucursal = await _context.Sucursales
-                    .FirstOrDefaultAsync(s => s.GerenteId == gerente!.Id);
+                var gerente = await _usuarioService.ObtenerUsuarioActualAsync();
+                var sucursal = await _sucursalService.ObtenerSucursalDeGerenteAsync(gerente!.Id);
 
                 if (sucursal == null)
                 {
@@ -264,9 +275,8 @@ namespace Autos.Controllers
             try 
             {
                 // Obtener la sucursal del gerente
-                var gerente = await _userManager.GetUserAsync(User);
-                var sucursal = await _context.Sucursales
-                    .FirstOrDefaultAsync(s => s.GerenteId == gerente!.Id);
+                var gerente = await _usuarioService.ObtenerUsuarioActualAsync();
+                var sucursal = await _sucursalService.ObtenerSucursalDeGerenteAsync(gerente!.Id);
 
                 if (sucursal == null)
                 {
@@ -275,16 +285,12 @@ namespace Autos.Controllers
                 }
 
                 // Obtener SOLO los vendedores de la sucursal del gerente
-                var vendedoresSucursal = await _context.UsuariosSucursales
-                    .Include(us => us.Usuario)
-                    .Include(us => us.Sucursal)
-                    .Where(us => us.SucursalId == sucursal.Id)
-                    .ToListAsync();
+                var vendedoresSucursal = await _sucursalService.ObtenerAsignacionesDeSucursalAsync(sucursal.Id);
                 
                 var viewModel = new AdministrarVendedoresViewModel
                 {
                     Sucursal = sucursal,
-                    VendedoresAsignados = vendedoresSucursal,
+                    VendedoresAsignados = vendedoresSucursal.ToList(),
                     VendedoresDisponibles = new List<Usuario>() // Lista vacía ya que no pueden asignar vendedores
                 };
 
@@ -324,7 +330,7 @@ namespace Autos.Controllers
             }
 
             // Verificar que el gerente administre esta sucursal
-            var gerente = await _userManager.GetUserAsync(User);
+            var gerente = await _usuarioService.ObtenerUsuarioActualAsync();
             if (asignacion.Sucursal?.GerenteId != gerente!.Id)
             {
                 TempData["Error"] = "No tiene permiso para desasignar vendedores de otras sucursales.";
@@ -332,22 +338,25 @@ namespace Autos.Controllers
             }
 
             // Verificar si el vendedor tiene ventas pendientes
-            var tieneVentasPendientes = await _context.Ventas
-                .Where(v => v.VendedorId == asignacion.UsuarioId)
-                .Select(v => new { v.Id, v.VendedorId })
-                .AnyAsync();
-
-            if (tieneVentasPendientes)
+            var ventas = await _ventaService.ObtenerVentasPorVendedorAsync(asignacion.UsuarioId);
+            if (ventas.Any())
             {
                 TempData["Error"] = "No se puede desasignar porque el vendedor tiene ventas registradas.";
                 return RedirectToAction("AdministrarVendedores");
             }
 
-            // Eliminar la asignación
-            _context.UsuariosSucursales.Remove(asignacion);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Vendedor desasignado correctamente de la sucursal.";
+            // Desasignar el vendedor
+            var resultado = await _sucursalService.DesasignarVendedorDeSucursalAsync(asignacionId);
+            
+            if (resultado)
+            {
+                TempData["Success"] = "Vendedor desasignado correctamente de la sucursal.";
+            }
+            else
+            {
+                TempData["Error"] = "No se pudo desasignar al vendedor. Intente nuevamente.";
+            }
+            
             return RedirectToAction("AdministrarVendedores");
         }
 
@@ -360,17 +369,23 @@ namespace Autos.Controllers
             }
 
             // Obtener el vendedor
-            var vendedor = await _userManager.FindByIdAsync(id);
+            var vendedor = await _usuarioService.ObtenerUsuarioPorIdAsync(id);
             
-            if (vendedor == null || !await _userManager.IsInRoleAsync(vendedor, "Vendedor"))
+            if (vendedor == null)
             {
                 return NotFound("Vendedor no encontrado");
             }
 
+            // Verificar que es un vendedor
+            var roles = await _usuarioService.ObtenerRolesDeUsuarioAsync(vendedor);
+            if (!roles.Contains("Vendedor"))
+            {
+                return NotFound("El usuario no es un vendedor");
+            }
+
             // Obtener la sucursal del gerente actual
-            var gerente = await _userManager.GetUserAsync(User);
-            var sucursal = await _context.Sucursales
-                .FirstOrDefaultAsync(s => s.GerenteId == gerente!.Id);
+            var gerente = await _usuarioService.ObtenerUsuarioActualAsync();
+            var sucursal = await _sucursalService.ObtenerSucursalDeGerenteAsync(gerente!.Id);
 
             if (sucursal == null)
             {
@@ -411,7 +426,14 @@ namespace Autos.Controllers
         // Obtener el ID del usuario actual
         private string GetCurrentUserId()
         {
-            return _userManager.GetUserId(User) ?? string.Empty;
+            // Debemos asegurarnos de que el User.Identity está autenticado
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return string.Empty;
+            }
+            
+            // Obtener el ID del usuario de las claims
+            return User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         }
 
         // GET: Gerente/SolicitudesDescuento

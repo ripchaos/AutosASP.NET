@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Collections.Generic;
+using Autos.Models.ViewModels;
 
 namespace Autos.Controllers
 {
@@ -30,7 +32,8 @@ namespace Autos.Controllers
             _context = context;
         }
 
-        // 🚀 Vista de Login
+        // 🚪 Iniciar sesión
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
@@ -47,6 +50,30 @@ namespace Autos.Controllers
                     var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: false);
                     if (result.Succeeded)
                     {
+                        // Redirigir al usuario según su rol
+                        var roles = await _userManager.GetRolesAsync(user);
+                        
+                        if (roles.Contains("Cliente"))
+                        {
+                            return RedirectToAction("Dashboard", "Cliente");
+                        }
+                        else if (roles.Contains("Vendedor")) 
+                        {
+                            return RedirectToAction("Dashboard", "Vendedor");
+                        }
+                        else if (roles.Contains("Gerente"))
+                        {
+                            return RedirectToAction("Dashboard", "Gerente");
+                        }
+                        else if (roles.Contains("Recepcionista"))
+                        {
+                            return RedirectToAction("Dashboard", "Recepcionista");
+                        }
+                        else if (roles.Contains("Administrador"))
+                        {
+                            return RedirectToAction("Dashboard", "Admin");
+                        }
+
                         return RedirectToAction("Index", "Home");
                     }
                 }
@@ -88,16 +115,78 @@ namespace Autos.Controllers
                     AutoInteresadoId = model.AutoInteresadoId
                 };
 
-                // Asignar vendedor aleatorio
-                var vendedores = await _userManager.GetUsersInRoleAsync("Vendedor");
-                if (vendedores.Any())
+                // Obtener la sucursal del recepcionista actual si el usuario es un recepcionista
+                if (User.IsInRole("Recepcionista"))
                 {
-                    // Obtener un vendedor aleatorio
-                    var random = new Random();
-                    int index = random.Next(vendedores.Count);
-                    var vendedorAsignado = vendedores.ElementAt(index);
-                    
-                    user.VendedorAsignadoId = vendedorAsignado.Id;
+                    // Obtener el recepcionista
+                    var recepcionistaActual = await _userManager.GetUserAsync(User);
+                    if (recepcionistaActual != null)
+                    {
+                        // Obtener la asignación de sucursal del recepcionista
+                        var asignacionRecepcionista = await _context.UsuariosSucursales
+                            .Where(us => us.UsuarioId == recepcionistaActual.Id && us.Activo)
+                            .FirstOrDefaultAsync();
+
+                        if (asignacionRecepcionista != null)
+                        {
+                            Console.WriteLine($"Recepcionista asignado a sucursal ID: {asignacionRecepcionista.SucursalId}");
+                            
+                            // Obtener vendedores de la misma sucursal
+                            var vendedoresDeSucursal = await _context.UsuariosSucursales
+                                .Where(us => us.SucursalId == asignacionRecepcionista.SucursalId && us.Activo)
+                                .Select(us => us.UsuarioId)
+                                .ToListAsync();
+
+                            Console.WriteLine($"Encontrados {vendedoresDeSucursal.Count} posibles vendedores en la sucursal");
+                            
+                            if (vendedoresDeSucursal.Any())
+                            {
+                                // Filtrar los usuarios por rol
+                                var vendedoresFiltrados = new List<Usuario>();
+                                foreach (var vendedorId in vendedoresDeSucursal)
+                                {
+                                    var potencialVendedor = await _userManager.FindByIdAsync(vendedorId);
+                                    if (potencialVendedor != null && await _userManager.IsInRoleAsync(potencialVendedor, "Vendedor"))
+                                    {
+                                        vendedoresFiltrados.Add(potencialVendedor);
+                                    }
+                                }
+
+                                Console.WriteLine($"De ellos, {vendedoresFiltrados.Count} son realmente vendedores");
+                                
+                                if (vendedoresFiltrados.Any())
+                                {
+                                    // Asignar un vendedor aleatorio de la sucursal
+                                    var random = new Random();
+                                    int index = random.Next(vendedoresFiltrados.Count);
+                                    var vendedorAsignado = vendedoresFiltrados[index];
+                                    user.VendedorAsignadoId = vendedorAsignado.Id;
+                                    Console.WriteLine($"Asignado vendedor ID: {vendedorAsignado.Id}, Nombre: {vendedorAsignado.Nombre} de la sucursal");
+                                }
+                                else
+                                {
+                                    Console.WriteLine("No se encontraron vendedores válidos en la sucursal");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("El recepcionista no tiene asignación de sucursal activa");
+                        }
+                    }
+                }
+                else if (User.IsInRole("Administrador"))
+                {
+                    // Si es administrador, mantener la asignación aleatoria entre todos los vendedores
+                    var todosVendedores = await _userManager.GetUsersInRoleAsync("Vendedor");
+                    if (todosVendedores.Any())
+                    {
+                        var random = new Random();
+                        int index = random.Next(todosVendedores.Count);
+                        var vendedorAsignado = todosVendedores.ElementAt(index);
+                        user.VendedorAsignadoId = vendedorAsignado.Id;
+                        Console.WriteLine($"Admin creando cliente: Asignado vendedor aleatorio ID: {vendedorAsignado.Id}, Nombre: {vendedorAsignado.Nombre}");
+                    }
                 }
 
                 // Generar contraseña aleatoria

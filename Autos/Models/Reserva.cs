@@ -36,6 +36,16 @@ namespace Autos.Models
         [StringLength(500)]
         public string? Comentarios { get; set; }
 
+        // Motivo de cancelación (si fue cancelada)
+        [StringLength(500)]
+        public string? MotivoCancelacion { get; set; }
+
+        // Fecha de cancelación (si fue cancelada)
+        public DateTime? FechaCancelacion { get; set; }
+
+        // Fecha de concretación de venta (si se convirtió en venta)
+        public DateTime? FechaConcretacion { get; set; }
+
         // Propiedad calculada para determinar si la reserva está vencida
         [NotMapped]
         public bool EstaVencida => FechaExpiracion < DateTime.Now && Estado == "Activa";

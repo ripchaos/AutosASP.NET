@@ -1,5 +1,6 @@
 using Autos.Data;
 using Autos.Models;
+using Autos.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,22 +16,31 @@ namespace Autos.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IVentaService _ventaService;
+        private readonly IAutoService _autoService;
+        private readonly ISolicitudDescuentoService _solicitudDescuentoService;
+        private readonly IUsuarioService _usuarioService;
 
-        public VentasController(ApplicationDbContext context, UserManager<Usuario> userManager)
+        public VentasController(
+            ApplicationDbContext context, 
+            UserManager<Usuario> userManager,
+            IVentaService ventaService,
+            IAutoService autoService,
+            ISolicitudDescuentoService solicitudDescuentoService,
+            IUsuarioService usuarioService)
         {
             _context = context;
             _userManager = userManager;
+            _ventaService = ventaService;
+            _autoService = autoService;
+            _solicitudDescuentoService = solicitudDescuentoService;
+            _usuarioService = usuarioService;
         }
 
         // GET: Ventas
         public async Task<IActionResult> Index()
         {
-            var ventas = await _context.Ventas
-                .Include(v => v.Auto)
-                .Include(v => v.Vendedor)
-                .Include(v => v.Cliente)
-                .ToListAsync();
-            
+            var ventas = await _ventaService.ObtenerVentasReciententesAsync(100); // Obtener las 100 ventas más recientes
             return View(ventas);
         }
 
@@ -42,11 +52,7 @@ namespace Autos.Controllers
                 return NotFound();
             }
 
-            var venta = await _context.Ventas
-                .Include(v => v.Auto)
-                .Include(v => v.Vendedor)
-                .Include(v => v.Cliente)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var venta = await _ventaService.ObtenerVentaPorIdAsync(id.Value);
             
             if (venta == null)
             {
@@ -60,7 +66,7 @@ namespace Autos.Controllers
         public async Task<IActionResult> Create(string? clienteId = null, int? autoId = null)
         {
             // Obtener el vendedor actual
-            var vendedorActual = await _userManager.GetUserAsync(User);
+            var vendedorActual = await _usuarioService.ObtenerUsuarioActualAsync();
             if (vendedorActual == null)
             {
                 return NotFound("No se pudo identificar al vendedor actual.");
@@ -70,14 +76,14 @@ namespace Autos.Controllers
             ViewBag.VendedorActual = new { Id = vendedorActual.Id, Nombre = vendedorActual.Nombre };
             
             // Cargar autos disponibles para venta
-            ViewBag.Autos = _context.Autos
-                .Where(a => a.Disponibilidad)
+            var autosDisponibles = await _autoService.ObtenerAutosDisponiblesAsync();
+            ViewBag.Autos = autosDisponibles
                 .Select(a => new { Id = a.Id, Nombre = $"{a.Marca} {a.Modelo} ({a.Anio})" })
                 .ToList();
             
             // Cargar clientes
-            ViewBag.Clientes = _context.Users
-                .Where(u => u.Rol == "Cliente")
+            var clientes = await _usuarioService.ObtenerUsuariosPorRolAsync("Cliente");
+            ViewBag.Clientes = clientes
                 .Select(u => new { Id = u.Id, Nombre = u.Nombre })
                 .ToList();
 
@@ -94,7 +100,7 @@ namespace Autos.Controllers
                 ViewBag.ClienteSeleccionado = clienteId;
                 
                 // Obtener información adicional del cliente
-                var cliente = await _userManager.FindByIdAsync(clienteId);
+                var cliente = await _usuarioService.ObtenerUsuarioPorIdAsync(clienteId);
                 if (cliente != null)
                 {
                     ViewBag.ClienteSeleccionadoNombre = cliente.Nombre;
@@ -107,7 +113,7 @@ namespace Autos.Controllers
                 ViewBag.AutoSeleccionado = autoId;
 
                 // Obtener el precio del auto para pre-cargar
-                var auto = await _context.Autos.FindAsync(autoId.Value);
+                var auto = await _autoService.ObtenerAutoPorIdAsync(autoId.Value);
                 if (auto != null)
                 {
                     venta.Monto = auto.Precio;
@@ -125,15 +131,16 @@ namespace Autos.Controllers
             if (ModelState.IsValid)
             {
                 // Actualizar disponibilidad del auto
-                var auto = await _context.Autos.FindAsync(venta.AutoId);
+                var auto = await _autoService.ObtenerAutoPorIdAsync(venta.AutoId);
                 if (auto != null)
                 {
                     auto.Disponibilidad = false;
-                    _context.Update(auto);
+                    auto.EstadoReserva = "Vendido";
+                    await _autoService.GuardarAutoAsync(auto);
                 }
                 
-                _context.Add(venta);
-                await _context.SaveChangesAsync();
+                // Registrar la venta
+                await _ventaService.RegistrarVentaAsync(venta);
                 
                 TempData["Success"] = "¡Venta registrada correctamente!";
                 return RedirectToAction(nameof(Index));
@@ -151,7 +158,7 @@ namespace Autos.Controllers
                 return NotFound();
             }
 
-            var auto = await _context.Autos.FindAsync(autoId);
+            var auto = await _autoService.ObtenerAutoPorIdAsync(autoId.Value);
             if (auto == null)
             {
                 return NotFound();
@@ -170,7 +177,7 @@ namespace Autos.Controllers
         [Authorize(Roles = "Vendedor")]
         public async Task<IActionResult> SolicitarDescuento(int autoId, decimal porcentajeSolicitado, string justificacion)
         {
-            var auto = await _context.Autos.FindAsync(autoId);
+            var auto = await _autoService.ObtenerAutoPorIdAsync(autoId);
             if (auto == null)
             {
                 return NotFound();
@@ -180,7 +187,7 @@ namespace Autos.Controllers
             decimal maxDescuento = config?.PorcentajeMaximo ?? 10;
             
             // Obtener el vendedor actual
-            var vendedorActual = await _userManager.GetUserAsync(User);
+            var vendedorActual = await _usuarioService.ObtenerUsuarioActualAsync();
             if (vendedorActual == null)
             {
                 return NotFound("No se pudo identificar al vendedor actual.");
@@ -204,8 +211,7 @@ namespace Autos.Controllers
                     FechaSolicitud = DateTime.Now
                 };
                 
-                _context.SolicitudesDescuento.Add(solicitud);
-                await _context.SaveChangesAsync();
+                await _solicitudDescuentoService.CrearSolicitudAsync(solicitud);
                 
                 TempData["Info"] = $"Solicitud de descuento del {porcentajeSolicitado}% enviada al gerente para su aprobación.";
                 return RedirectToAction("Index", "Autos");
@@ -216,17 +222,13 @@ namespace Autos.Controllers
         [Authorize(Roles = "Gerente,Administrador")]
         public async Task<IActionResult> AutorizarDescuentos()
         {
-            // Por defecto, obtener todas las solicitudes pendientes
-            var query = _context.SolicitudesDescuento
-                .Include(s => s.Auto)
-                .ThenInclude(a => a!.Sucursal)
-                .Include(s => s.Vendedor)
-                .Where(s => !s.Aprobada.HasValue); // Solo mostrar las pendientes
+            // Obtener todas las solicitudes pendientes
+            var solicitudesPendientes = await _solicitudDescuentoService.ObtenerSolicitudesPendientesAsync();
             
-            // Si es gerente, solo mostrar solicitudes de su sucursal
+            // Si es gerente, filtrar por sucursal
             if (User.IsInRole("Gerente") && !User.IsInRole("Administrador"))
             {
-                var usuario = await _userManager.GetUserAsync(User);
+                var usuario = await _usuarioService.ObtenerUsuarioActualAsync();
                 if (usuario != null)
                 {
                     // Obtener la sucursal del gerente
@@ -236,16 +238,14 @@ namespace Autos.Controllers
                     if (sucursalGerente != null)
                     {
                         // Filtrar solicitudes que pertenecen a autos de su sucursal
-                        query = query.Where(s => s.Auto!.SucursalId == sucursalGerente.Id);
+                        solicitudesPendientes = solicitudesPendientes
+                            .Where(s => s.Auto != null && s.Auto.SucursalId == sucursalGerente.Id)
+                            .ToList();
                     }
                 }
             }
             
-            var solicitudes = await query
-                .OrderByDescending(s => s.FechaSolicitud)
-                .ToListAsync();
-            
-            return View(solicitudes);
+            return View(solicitudesPendientes);
         }
         
         // Obtener el ID del usuario actual
@@ -270,10 +270,8 @@ namespace Autos.Controllers
                 return false;
                 
             // Verificar si la solicitud pertenece a un auto de su sucursal
-            var solicitud = await _context.SolicitudesDescuento
-                .Include(s => s.Auto)
-                .FirstOrDefaultAsync(s => s.Id == solicitudId);
-                
+            var solicitud = await _solicitudDescuentoService.ObtenerSolicitudPorIdAsync(solicitudId);
+            
             if (solicitud?.Auto == null)
                 return false;
                 
@@ -289,20 +287,27 @@ namespace Autos.Controllers
         [HttpPost]
         public async Task<IActionResult> AprobarDescuento(int id, string? comentario)
         {
-            var solicitud = await _context.SolicitudesDescuento
-                .FirstOrDefaultAsync(s => s.Id == id);
-            
-            if (solicitud == null)
+            // Verificar que el gerente pueda aprobar esta solicitud
+            if (!await PuedeAprobarSolicitud(id))
             {
-                return NotFound();
+                TempData["Error"] = "No tienes permiso para aprobar esta solicitud de descuento.";
+                return RedirectToAction(nameof(AutorizarDescuentos));
             }
 
-            solicitud.Aprobada = true;
-            solicitud.FechaResolucion = DateTime.Now;
-            solicitud.GerenteId = GetCurrentUserId();
-            solicitud.ComentarioGerente = comentario;
-
-            await _context.SaveChangesAsync();
+            // Obtener ID del gerente actual
+            var gerenteId = _userManager.GetUserId(User);
+            
+            // Comprobar si gerenteId es nulo y proporcionar un valor por defecto
+            if (gerenteId == null)
+            {
+                TempData["Error"] = "No se pudo identificar al gerente. Por favor, intente nuevamente.";
+                return RedirectToAction(nameof(AutorizarDescuentos));
+            }
+            
+            // Aprobar la solicitud
+            await _solicitudDescuentoService.AprobarSolicitudAsync(id, gerenteId);
+            
+            TempData["Success"] = "Solicitud de descuento aprobada correctamente.";
             return RedirectToAction(nameof(AutorizarDescuentos));
         }
         
@@ -311,20 +316,27 @@ namespace Autos.Controllers
         [HttpPost]
         public async Task<IActionResult> RechazarDescuento(int id, string? comentario)
         {
-            var solicitud = await _context.SolicitudesDescuento
-                .FirstOrDefaultAsync(s => s.Id == id);
-            
-            if (solicitud == null)
+            // Verificar que el gerente pueda rechazar esta solicitud
+            if (!await PuedeAprobarSolicitud(id))
             {
-                return NotFound();
+                TempData["Error"] = "No tienes permiso para rechazar esta solicitud de descuento.";
+                return RedirectToAction(nameof(AutorizarDescuentos));
             }
 
-            solicitud.Aprobada = false;
-            solicitud.FechaResolucion = DateTime.Now;
-            solicitud.GerenteId = GetCurrentUserId();
-            solicitud.ComentarioGerente = comentario;
-
-            await _context.SaveChangesAsync();
+            // Obtener ID del gerente actual
+            var gerenteId = _userManager.GetUserId(User);
+            
+            // Comprobar si gerenteId es nulo y proporcionar un valor por defecto
+            if (gerenteId == null)
+            {
+                TempData["Error"] = "No se pudo identificar al gerente. Por favor, intente nuevamente.";
+                return RedirectToAction(nameof(AutorizarDescuentos));
+            }
+            
+            // Rechazar la solicitud
+            await _solicitudDescuentoService.RechazarSolicitudAsync(id, gerenteId, comentario ?? "");
+            
+            TempData["Success"] = "Solicitud de descuento rechazada.";
             return RedirectToAction(nameof(AutorizarDescuentos));
         }
     }

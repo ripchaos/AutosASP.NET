@@ -7,7 +7,9 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Autos.Services;
+using Autos.Services.Interfaces;
 using System.Globalization;
+using Autos.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,12 +42,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Agregar servicios al contenedor.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 
-// Registrar el servicio de correo electrónico
+// Registrar los servicios de la aplicación
 builder.Services.AddScoped<IEmailService, EmailService>();
-
-// Registrar el servicio de plantillas de correo electrónico
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+// Registrar servicios pendientes de implementar (estos se implementarán posteriormente)
+builder.Services.AddScoped<IAutoService, AutoService>();
+builder.Services.AddScoped<IReservaService, ReservaService>();
+builder.Services.AddScoped<IVentaService, VentaService>();
+builder.Services.AddScoped<ISucursalService, SucursalService>();
+builder.Services.AddScoped<ISolicitudDescuentoService, SolicitudDescuentoService>();
 
 var app = builder.Build();
 
@@ -68,6 +77,9 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Agregar middleware de redirección basada en roles
+app.UseRoleBasedRedirect();
 
 // 📌 Configurar rutas de controladores
 app.MapControllerRoute(

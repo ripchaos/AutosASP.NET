@@ -30,7 +30,15 @@ namespace Autos.Models
 
         public bool? Aprobada { get; set; }
 
+        // Fecha de respuesta (cuando se aprueba o rechaza)
+        public DateTime? FechaRespuesta { get; set; }
+        
+        // Fecha de resolución existente (para mantener compatibilidad)
         public DateTime? FechaResolucion { get; set; }
+
+        // Motivo de rechazo (si fue rechazada)
+        [StringLength(500)]
+        public string? MotivoRechazo { get; set; }
 
         public string? ComentarioGerente { get; set; }
 

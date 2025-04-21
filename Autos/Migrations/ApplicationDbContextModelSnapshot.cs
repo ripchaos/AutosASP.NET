@@ -232,11 +232,21 @@ namespace Autos.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<DateTime?>("FechaCancelacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaConcretacion")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("FechaExpiracion")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("FechaReserva")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("MotivoCancelacion")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("UsuarioId")
                         .IsRequired()
@@ -276,6 +286,9 @@ namespace Autos.Migrations
                     b.Property<DateTime?>("FechaResolucion")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("FechaRespuesta")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("FechaSolicitud")
                         .HasColumnType("datetime2");
 
@@ -284,6 +297,10 @@ namespace Autos.Migrations
 
                     b.Property<string>("Justificacion")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MotivoRechazo")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<decimal>("PorcentajeSolicitado")
                         .HasPrecision(5, 2)

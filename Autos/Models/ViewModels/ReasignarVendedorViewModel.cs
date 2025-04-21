@@ -7,12 +7,12 @@ namespace Autos.Models.ViewModels
 {
     public class ReasignarVendedorViewModel
     {
-        public string ClienteId { get; set; }
-        public string NombreCliente { get; set; }
-        public string EmailCliente { get; set; }
+        public required string ClienteId { get; set; }
+        public required string NombreCliente { get; set; }
+        public required string EmailCliente { get; set; }
         
         public string? VendedorActualId { get; set; }
-        public string VendedorActualNombre { get; set; }
+        public required string VendedorActualNombre { get; set; } = string.Empty;
         
         [Display(Name = "Nuevo Vendedor")]
         public string? NuevoVendedorId { get; set; }

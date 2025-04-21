@@ -52,7 +52,7 @@
               "RelativeDocumentMoniker": "Views\\Admin\\Usuarios.cshtml",
               "ToolTip": "C:\\Users\\Rip\\Documents\\Github\\AutosASP.NET\\Autos\\Views\\Admin\\Usuarios.cshtml",
               "RelativeToolTip": "Views\\Admin\\Usuarios.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAAkAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-04-20T19:13:05.973Z",
               "EditorCaption": ""
@@ -67,8 +67,7 @@
               "RelativeToolTip": "Views\\Autos\\Index.cshtml",
               "ViewState": "AgIAAHcAAAAAAAAAAAArwH4AAABOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-20T00:06:33.197Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-20T00:06:33.197Z"
             },
             {
               "$type": "Document",
@@ -92,8 +91,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAAH8AAAAAAAAAAAAkwIsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-09T04:54:37.696Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-09T04:54:37.696Z"
             },
             {
               "$type": "Document",
@@ -117,8 +115,7 @@
               "RelativeToolTip": "Views\\Admin\\Configuracion.cshtml",
               "ViewState": "AgIAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-19T03:37:00.681Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-19T03:37:00.681Z"
             },
             {
               "$type": "Document",
