@@ -533,4 +533,3 @@ C:\Users\Rip\Documents\Github\AutosASP.NET\Autos\obj\Debug\net8.0\refint\Autos.d
 C:\Users\Rip\Documents\Github\AutosASP.NET\Autos\obj\Debug\net8.0\Autos.pdb
 C:\Users\Rip\Documents\Github\AutosASP.NET\Autos\obj\Debug\net8.0\Autos.genruntimeconfig.cache
 C:\Users\Rip\Documents\Github\AutosASP.NET\Autos\obj\Debug\net8.0\ref\Autos.dll
-C:\Users\Rip\Documents\Github\AutosASP.NET\Autos\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

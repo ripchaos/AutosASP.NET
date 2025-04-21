@@ -360,6 +360,481 @@ namespace Autos.Data.Migrations
                 
                 await context.SaveChangesAsync();
             }
+            
+            // Crear 30 vehículos de prueba para las sucursales
+            if (!await context.Autos.AnyAsync())
+            {
+                var sucursalesRegistradas = await context.Sucursales.ToListAsync();
+                var autos = new List<Auto>();
+                
+                // Sucursal San José
+                var sucursalSanJose = sucursalesRegistradas.FirstOrDefault(s => s.Nombre.Contains("San José"));
+                if (sucursalSanJose != null)
+                {
+                    autos.AddRange(new List<Auto>
+                    {
+                        new Auto { 
+                            Marca = "Toyota", 
+                            Modelo = "Corolla", 
+                            Anio = 2023, 
+                            Precio = 18500000, 
+                            Kilometraje = 0,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Blanco",
+                            Categoria = "Sedán",
+                            SucursalId = sucursalSanJose.Id
+                        },
+                        new Auto { 
+                            Marca = "Honda", 
+                            Modelo = "CR-V", 
+                            Anio = 2023, 
+                            Precio = 23500000, 
+                            Kilometraje = 0,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Gris",
+                            Categoria = "SUV",
+                            SucursalId = sucursalSanJose.Id
+                        },
+                        new Auto { 
+                            Marca = "Nissan", 
+                            Modelo = "Sentra", 
+                            Anio = 2022, 
+                            Precio = 15800000, 
+                            Kilometraje = 12000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Azul",
+                            Categoria = "Sedán",
+                            SucursalId = sucursalSanJose.Id
+                        },
+                        new Auto { 
+                            Marca = "BMW", 
+                            Modelo = "X3", 
+                            Anio = 2022, 
+                            Precio = 32000000, 
+                            Kilometraje = 5000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Negro",
+                            Categoria = "SUV Premium",
+                            SucursalId = sucursalSanJose.Id
+                        },
+                        new Auto { 
+                            Marca = "Hyundai", 
+                            Modelo = "Tucson", 
+                            Anio = 2023, 
+                            Precio = 21500000, 
+                            Kilometraje = 0,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Rojo",
+                            Categoria = "SUV",
+                            SucursalId = sucursalSanJose.Id
+                        },
+                        new Auto { 
+                            Marca = "Kia", 
+                            Modelo = "Sportage", 
+                            Anio = 2022, 
+                            Precio = 20800000, 
+                            Kilometraje = 8000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Blanco",
+                            Categoria = "SUV",
+                            SucursalId = sucursalSanJose.Id
+                        }
+                    });
+                }
+                
+                // Sucursal Cartago
+                var sucursalCartago = sucursalesRegistradas.FirstOrDefault(s => s.Nombre.Contains("Cartago"));
+                if (sucursalCartago != null)
+                {
+                    autos.AddRange(new List<Auto>
+                    {
+                        new Auto { 
+                            Marca = "Toyota", 
+                            Modelo = "Hilux", 
+                            Anio = 2023, 
+                            Precio = 28500000, 
+                            Kilometraje = 0,
+                            Transmision = "Manual", 
+                            Combustible = "Diésel", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Blanco",
+                            Categoria = "Pick-up",
+                            SucursalId = sucursalCartago.Id
+                        },
+                        new Auto { 
+                            Marca = "Suzuki", 
+                            Modelo = "Swift", 
+                            Anio = 2023, 
+                            Precio = 12500000, 
+                            Kilometraje = 0,
+                            Transmision = "Manual", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Amarillo",
+                            Categoria = "Hatchback",
+                            SucursalId = sucursalCartago.Id
+                        },
+                        new Auto { 
+                            Marca = "Mitsubishi", 
+                            Modelo = "Montero Sport", 
+                            Anio = 2022, 
+                            Precio = 26800000, 
+                            Kilometraje = 15000,
+                            Transmision = "Automática", 
+                            Combustible = "Diésel", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Gris",
+                            Categoria = "SUV",
+                            SucursalId = sucursalCartago.Id
+                        },
+                        new Auto { 
+                            Marca = "Audi", 
+                            Modelo = "A3", 
+                            Anio = 2022, 
+                            Precio = 27500000, 
+                            Kilometraje = 8000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Blanco",
+                            Categoria = "Sedán Premium",
+                            SucursalId = sucursalCartago.Id
+                        },
+                        new Auto { 
+                            Marca = "Hyundai", 
+                            Modelo = "Accent", 
+                            Anio = 2023, 
+                            Precio = 16900000, 
+                            Kilometraje = 0,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Azul",
+                            Categoria = "Sedán",
+                            SucursalId = sucursalCartago.Id
+                        },
+                        new Auto { 
+                            Marca = "Ford", 
+                            Modelo = "EcoSport", 
+                            Anio = 2022, 
+                            Precio = 19500000, 
+                            Kilometraje = 10000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Rojo",
+                            Categoria = "SUV Compacto",
+                            SucursalId = sucursalCartago.Id
+                        }
+                    });
+                }
+                
+                // Sucursal Heredia
+                var sucursalHeredia = sucursalesRegistradas.FirstOrDefault(s => s.Nombre.Contains("Heredia"));
+                if (sucursalHeredia != null)
+                {
+                    autos.AddRange(new List<Auto>
+                    {
+                        new Auto { 
+                            Marca = "Nissan", 
+                            Modelo = "Frontier", 
+                            Anio = 2022, 
+                            Precio = 26800000, 
+                            Kilometraje = 12000,
+                            Transmision = "Automática", 
+                            Combustible = "Diésel", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Negro",
+                            Categoria = "Pick-up",
+                            SucursalId = sucursalHeredia.Id
+                        },
+                        new Auto { 
+                            Marca = "Mazda", 
+                            Modelo = "CX-5", 
+                            Anio = 2023, 
+                            Precio = 24500000, 
+                            Kilometraje = 0,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Rojo",
+                            Categoria = "SUV",
+                            SucursalId = sucursalHeredia.Id
+                        },
+                        new Auto { 
+                            Marca = "Volkswagen", 
+                            Modelo = "Tiguan", 
+                            Anio = 2022, 
+                            Precio = 25800000, 
+                            Kilometraje = 8000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Plata",
+                            Categoria = "SUV",
+                            SucursalId = sucursalHeredia.Id
+                        },
+                        new Auto { 
+                            Marca = "Mercedes-Benz", 
+                            Modelo = "GLA 200", 
+                            Anio = 2022, 
+                            Precio = 33000000, 
+                            Kilometraje = 6000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Negro",
+                            Categoria = "SUV Premium",
+                            SucursalId = sucursalHeredia.Id
+                        },
+                        new Auto { 
+                            Marca = "Hyundai", 
+                            Modelo = "Elantra", 
+                            Anio = 2023, 
+                            Precio = 17800000, 
+                            Kilometraje = 0,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Gris",
+                            Categoria = "Sedán",
+                            SucursalId = sucursalHeredia.Id
+                        },
+                        new Auto { 
+                            Marca = "Honda", 
+                            Modelo = "HR-V", 
+                            Anio = 2022, 
+                            Precio = 22500000, 
+                            Kilometraje = 9000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Azul",
+                            Categoria = "SUV Compacto",
+                            SucursalId = sucursalHeredia.Id
+                        }
+                    });
+                }
+                
+                // Sucursal Guanacaste
+                var sucursalGuanacaste = sucursalesRegistradas.FirstOrDefault(s => s.Nombre.Contains("Guanacaste"));
+                if (sucursalGuanacaste != null)
+                {
+                    autos.AddRange(new List<Auto>
+                    {
+                        new Auto { 
+                            Marca = "Toyota", 
+                            Modelo = "RAV4", 
+                            Anio = 2023, 
+                            Precio = 25800000, 
+                            Kilometraje = 0,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Verde",
+                            Categoria = "SUV",
+                            SucursalId = sucursalGuanacaste.Id
+                        },
+                        new Auto { 
+                            Marca = "Ford", 
+                            Modelo = "Ranger", 
+                            Anio = 2022, 
+                            Precio = 27500000, 
+                            Kilometraje = 15000,
+                            Transmision = "Automática", 
+                            Combustible = "Diésel", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Blanco",
+                            Categoria = "Pick-up",
+                            SucursalId = sucursalGuanacaste.Id
+                        },
+                        new Auto { 
+                            Marca = "Suzuki", 
+                            Modelo = "Jimny", 
+                            Anio = 2023, 
+                            Precio = 18500000, 
+                            Kilometraje = 0,
+                            Transmision = "Manual", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Verde",
+                            Categoria = "4x4",
+                            SucursalId = sucursalGuanacaste.Id
+                        },
+                        new Auto { 
+                            Marca = "Isuzu", 
+                            Modelo = "D-Max", 
+                            Anio = 2022, 
+                            Precio = 24800000, 
+                            Kilometraje = 12000,
+                            Transmision = "Manual", 
+                            Combustible = "Diésel", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Blanco",
+                            Categoria = "Pick-up",
+                            SucursalId = sucursalGuanacaste.Id
+                        },
+                        new Auto { 
+                            Marca = "Kia", 
+                            Modelo = "Seltos", 
+                            Anio = 2023, 
+                            Precio = 21500000, 
+                            Kilometraje = 0,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Naranja",
+                            Categoria = "SUV Compacto",
+                            SucursalId = sucursalGuanacaste.Id
+                        },
+                        new Auto { 
+                            Marca = "Subaru", 
+                            Modelo = "Forester", 
+                            Anio = 2022, 
+                            Precio = 26500000, 
+                            Kilometraje = 7000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Azul",
+                            Categoria = "SUV",
+                            SucursalId = sucursalGuanacaste.Id
+                        }
+                    });
+                }
+                
+                // Sucursal Limón
+                var sucursalLimon = sucursalesRegistradas.FirstOrDefault(s => s.Nombre.Contains("Limón"));
+                if (sucursalLimon != null)
+                {
+                    autos.AddRange(new List<Auto>
+                    {
+                        new Auto { 
+                            Marca = "Toyota", 
+                            Modelo = "Land Cruiser Prado", 
+                            Anio = 2022, 
+                            Precio = 42800000, 
+                            Kilometraje = 5000,
+                            Transmision = "Automática", 
+                            Combustible = "Diésel", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Negro",
+                            Categoria = "SUV Premium",
+                            SucursalId = sucursalLimon.Id
+                        },
+                        new Auto { 
+                            Marca = "Mitsubishi", 
+                            Modelo = "L200", 
+                            Anio = 2023, 
+                            Precio = 26900000, 
+                            Kilometraje = 0,
+                            Transmision = "Automática", 
+                            Combustible = "Diésel", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Gris",
+                            Categoria = "Pick-up",
+                            SucursalId = sucursalLimon.Id
+                        },
+                        new Auto { 
+                            Marca = "Nissan", 
+                            Modelo = "X-Trail", 
+                            Anio = 2022, 
+                            Precio = 24500000, 
+                            Kilometraje = 10000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Azul",
+                            Categoria = "SUV",
+                            SucursalId = sucursalLimon.Id
+                        },
+                        new Auto { 
+                            Marca = "Great Wall", 
+                            Modelo = "Wingle 7", 
+                            Anio = 2023, 
+                            Precio = 21500000, 
+                            Kilometraje = 0,
+                            Transmision = "Manual", 
+                            Combustible = "Diésel", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Blanco",
+                            Categoria = "Pick-up",
+                            SucursalId = sucursalLimon.Id
+                        },
+                        new Auto { 
+                            Marca = "Renault", 
+                            Modelo = "Duster", 
+                            Anio = 2022, 
+                            Precio = 18500000, 
+                            Kilometraje = 12000,
+                            Transmision = "Manual", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Rojo",
+                            Categoria = "SUV Compacto",
+                            SucursalId = sucursalLimon.Id
+                        },
+                        new Auto { 
+                            Marca = "Chevrolet", 
+                            Modelo = "Traverse", 
+                            Anio = 2022, 
+                            Precio = 32500000, 
+                            Kilometraje = 8000,
+                            Transmision = "Automática", 
+                            Combustible = "Gasolina", 
+                            Disponibilidad = true,
+                            EstadoReserva = "Disponible",
+                            Color = "Negro",
+                            Categoria = "SUV Grande",
+                            SucursalId = sucursalLimon.Id
+                        }
+                    });
+                }
+                
+                context.Autos.AddRange(autos);
+                await context.SaveChangesAsync();
+            }
         }
     }
 } 
